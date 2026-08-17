@@ -1,0 +1,22 @@
+# @deepseek-ai/dsh-client-ui-muyu
+
+English | [中文](README.zh.md)
+
+<div align="center">
+  <img src="docs/images/preview.png" width="220" alt="Cyber wooden fish preview" />
+</div>
+
+A cyber wooden fish — a small floating widget in the web window. Tap it during work breaks to rack up some "merit".
+
+Click the fish to strike it; press and drag to move it anywhere. Progress survives page reloads — the rest is yours to discover~
+
+## Usage note
+
+The fish first appears in the bottom-right corner of the window. If you don't see it after opening the app, it may be covered by another floating panel or plugin — temporarily close the covering panel, drag the fish somewhere unobstructed, then reopen the panel.
+
+If it vanishes after a drag-and-release, it may have been dropped behind something — time to hunt down your missing fish (´▽｀)
+
+## Known Limitations and Deferred Work
+
+- **No sounds** — a real wooden fish clicks; this one is deliberately silent.
+- **Merit, position, and color are per-browser** — stored in `localStorage` rather than the session log, so a new machine or browser starts fresh.

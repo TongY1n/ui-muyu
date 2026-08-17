@@ -1,0 +1,358 @@
+.root {
+  /* Component-local presentation colors: merit gold and the rainbow glow are
+     this widget's own contract, not shared theme tokens. */
+  --muyu-gold: #ffd700;
+  --muyu-gold-glow: rgba(255, 215, 0, 0.35);
+  --muyu-rainbow-conic: conic-gradient(#f00, #ff8000, #ff0, #0f0, #0af, #80f, #f0f, #f00);
+  --muyu-rainbow-linear: linear-gradient(90deg, #f00, #ff8000, #ff0, #0f0, #0af, #80f, #f0f);
+  --muyu-face: rgba(30, 18, 8, 0.85);
+  --muyu-slot: rgba(30, 18, 8, 0.5);
+  --muyu-slot-highlight: rgba(255, 255, 255, 0.28);
+  --muyu-fish-inset: rgba(0, 0, 0, 0.16);
+  --muyu-glow-from: 0 0 8px 2px rgba(255, 0, 80, 0.55), 0 0 20px 6px rgba(128, 0, 255, 0.35);
+  --muyu-glow-to: 0 0 14px 4px rgba(0, 255, 200, 0.6), 0 0 30px 10px rgba(255, 128, 0, 0.45);
+
+  position: fixed;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 148px;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  /* The 148px-wide root must not swallow clicks on the app beneath: only the
+     fish and the panel are interactive. */
+  pointer-events: none;
+}
+
+.dragging {
+  cursor: grabbing;
+}
+
+.fishRow {
+  position: relative;
+  pointer-events: auto;
+}
+
+.fish {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border: 3px solid;
+  border-radius: 46% 54% 54% 46% / 52% 50% 50% 48%;
+  box-shadow: var(--dsw-shadow-lv2), inset 0 0 14px var(--muyu-fish-inset);
+  /* The hovering mallet icon is the strike affordance; the pointer stays the
+     plain arrow so the two never double up. */
+  cursor: default;
+  outline: none;
+}
+
+.fish:focus-visible {
+  box-shadow: var(--dsw-shadow-lv3), 0 0 0 2px var(--dsw-alias-border-l3);
+}
+
+/* Strike feedback: the fish dips and the mallet swings (struck lives on the row). */
+.struck .fish {
+  animation: fishShake 240ms ease;
+}
+
+@keyframes fishShake {
+  0% { transform: translateY(0) rotate(0deg); }
+  35% { transform: translateY(2px) rotate(-5deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+
+.eye {
+  position: absolute;
+  top: 17px;
+  right: 15px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muyu-face);
+}
+
+.slot {
+  position: absolute;
+  top: 30px;
+  left: 11px;
+  right: 11px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--muyu-slot);
+  box-shadow: 0 1px 0 var(--muyu-slot-highlight);
+}
+
+/* Rainbow easter egg: animated conic gradient + breathing multi-color glow. */
+.rainbow {
+  border-color: transparent;
+  background: var(--muyu-rainbow-conic);
+  animation: rainbowHue 2.4s linear infinite, rainbowGlow 1.1s ease-in-out infinite alternate;
+}
+
+@keyframes rainbowHue {
+  from { filter: hue-rotate(0deg); }
+  to { filter: hue-rotate(360deg); }
+}
+
+@keyframes rainbowGlow {
+  from { box-shadow: var(--muyu-glow-from); }
+  to { box-shadow: var(--muyu-glow-to); }
+}
+
+/* The hovering mallet icon: fades in on hover, swings on strike, follows the
+   fish color (inline fills carry the shaded wood tones). */
+.mallet {
+  position: absolute;
+  top: -34px;
+  left: 50%;
+  transform: translateX(-50%) rotate(30deg);
+  transform-origin: 65% 95%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms ease;
+}
+
+.hovered .mallet {
+  opacity: 1;
+}
+
+.struck .mallet {
+  animation: malletSwing 240ms ease;
+}
+
+/* Rainbow mallet: the same hue-rotate flow as the fish, so it is not static. */
+.malletRainbow {
+  animation: rainbowHue 2.4s linear infinite;
+}
+
+.struck .malletRainbow {
+  animation: malletSwing 240ms ease, rainbowHue 2.4s linear infinite;
+}
+
+@keyframes malletSwing {
+  0% { transform: translateX(-50%) rotate(30deg); }
+  40% { transform: translateX(-50%) rotate(-35deg); }
+  100% { transform: translateX(-50%) rotate(30deg); }
+}
+
+.floaters {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  pointer-events: none;
+  /* Merit floaters sit above the fish, mallet, and bubbles. */
+  z-index: 3;
+}
+
+.floater {
+  position: absolute;
+  transform: translateX(-50%);
+  /* Merit gained is gold, matching the counter below. */
+  color: var(--muyu-gold);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  text-shadow: 0 0 6px var(--muyu-gold-glow);
+  animation: floatUp 700ms ease forwards;
+}
+
+.floaterRainbow {
+  background: var(--muyu-rainbow-linear);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+}
+
+@keyframes floatUp {
+  0% { opacity: 0; transform: translate(-50%, 8px) scale(0.7); }
+  18% { opacity: 1; transform: translate(-50%, 0) scale(1.15); }
+  100% { opacity: 0; transform: translate(-50%, -36px) scale(1); }
+}
+
+/* Fast-strike complaint bubbles anchored at the fish's top-right corner.
+   They stack upward so they never cover the fish below. */
+.bubbles {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: -10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.bubble {
+  padding: 4px 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  background: var(--dsw-specific-menu);
+  box-shadow: var(--dsw-shadow-lv3);
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+  line-height: 15px;
+  white-space: nowrap;
+  animation: bubblePop 180ms ease;
+}
+
+@keyframes bubblePop {
+  from { opacity: 0; transform: translateY(4px) scale(0.9); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.panel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+.count {
+  padding: 4px 10px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 10px;
+  background: var(--dsw-specific-menu);
+  box-shadow: var(--dsw-shadow-lv2);
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+  line-height: 16px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.settings {
+  /* Absolutely positioned beside the merit bubble so the bubble stays centered;
+     hidden until the fish is hovered or the popover is open. */
+  position: absolute;
+  left: calc(100% + 6px);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 10px;
+  background: var(--dsw-specific-menu);
+  box-shadow: var(--dsw-shadow-lv2);
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: 1px;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 140ms ease, visibility 140ms;
+}
+
+.settingsVisible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.settings:hover,
+.settings[aria-expanded='true'] {
+  background: var(--dsw-alias-fill-l2);
+  color: var(--dsw-alias-label-primary);
+}
+
+.popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  /* Align the popover's right edge with the settings button (6px gap + 28px). */
+  right: -34px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: max-content;
+  padding: 6px 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 10px;
+  background: var(--dsw-specific-menu);
+  box-shadow: var(--dsw-shadow-lv3);
+  z-index: 1;
+}
+
+.tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.swatch {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.swatch[aria-pressed='true'] {
+  outline: 2px solid var(--dsw-alias-border-l3);
+  outline-offset: 1px;
+}
+
+.colorInput {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.action {
+  border: 0;
+  border-radius: 6px;
+  padding: 2px 6px;
+  background: var(--dsw-alias-fill-l2);
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+  line-height: 16px;
+  cursor: pointer;
+}
+
+.action:hover {
+  background: var(--dsw-alias-fill-l3);
+  color: var(--dsw-alias-label-primary);
+}
+
+.actionReset {
+  width: 100%;
+  border: 0;
+  border-radius: 6px;
+  padding: 3px 0;
+  background: transparent;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 11px;
+  line-height: 16px;
+  cursor: pointer;
+}
+
+.actionReset:hover {
+  background: var(--dsw-alias-fill-l3);
+  color: var(--dsw-alias-label-primary);
+}
+
+/* Respect reduced-motion: freeze the infinite rainbow flow and mallet hue
+   rotation; the fish stays visibly rainbow, just not animated. */
+@media (prefers-reduced-motion: reduce) {
+  .rainbow,
+  .malletRainbow,
+  .struck .malletRainbow {
+    animation: none;
+  }
+}
