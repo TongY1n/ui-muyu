@@ -43,3 +43,7 @@ A purely decorative browser widget — nothing more:
 ## License
 
 [MIT](LICENSE)
+
+## Acknowledgements
+
+Shepherded by TongY1n — lively development by DeepSeek-V4-Flash+Pro, serious review by GLM5.3, all on DeepSeek-Harness.

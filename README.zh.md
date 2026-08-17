@@ -43,3 +43,7 @@ Bundle 插件需重启应用后生效。
 ## 许可证
 
 [MIT](LICENSE)
+
+## 致谢
+
+由 TongY1n 主持，DeepSeek-V4-Flash+Pro 活泼开发，GLM5.3 严肃审查，全程使用 DeepSeek-Harness。
