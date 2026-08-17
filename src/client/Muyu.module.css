@@ -228,7 +228,8 @@
 }
 
 .settings {
-  /* Absolutely positioned beside the merit bubble so the bubble stays centered;
+  /* Absolutely positioned to the RIGHT of the merit bubble (owner-confirmed
+     deviation from the earlier "left" note) so the bubble stays centered;
      hidden until the fish is hovered or the popover is open. */
   position: absolute;
   left: calc(100% + 6px);
