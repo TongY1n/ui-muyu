@@ -43,6 +43,9 @@ const DRAG_THRESHOLD_PX = 4
 const SWING_MS = 240
 /** Floating label lifetime. */
 const FLOATER_MS = 700
+/** How long the hover reveal lingers after the pointer leaves, so the pointer
+    can reach the settings button (which sits beyond the root's edge). */
+const HOVER_LEAVE_MS = 1_000
 
 /** Quick-pick body colors shown in the settings popover. */
 const PRESET_COLORS = ['#a35c2f', '#c0392b', '#2980b9', '#27ae60', '#8e44ad', '#e67e22'] as const
@@ -108,6 +111,7 @@ function MalletIcon({ color, rainbow }: { color: string; rainbow: boolean }): Re
 export function Muyu({ t }: MuyuProps): ReactNode {
   const [state, setState] = useState<MuyuState>(() => loadState(safeStorage(), viewport()))
   const [hovered, setHovered] = useState(false)
+  const hoverTimer = useRef<number | null>(null)
   const [dragging, setDragging] = useState(false)
   const [striking, setStriking] = useState(false)
   const [floaters, setFloaters] = useState<Floater[]>([])
@@ -131,6 +135,7 @@ export function Muyu({ t }: MuyuProps): ReactNode {
 
   // Detach window listeners if the widget unmounts mid-drag (HMR safety).
   useEffect(() => () => {
+    if (hoverTimer.current !== null) window.clearTimeout(hoverTimer.current)
     const listeners = listenersRef.current
     if (listeners === null) return
     window.removeEventListener('pointermove', listeners.move)
@@ -165,6 +170,24 @@ export function Muyu({ t }: MuyuProps): ReactNode {
     document.addEventListener('pointerdown', onPress)
     return () => { document.removeEventListener('pointerdown', onPress) }
   }, [settingsOpen])
+
+  /** Reveal the hover chrome immediately and cancel any pending hide. */
+  const enterHover = (): void => {
+    if (hoverTimer.current !== null) {
+      window.clearTimeout(hoverTimer.current)
+      hoverTimer.current = null
+    }
+    setHovered(true)
+  }
+
+  /** Hide the hover chrome after a grace period, so a pointer moving toward the
+      settings button (beyond the root's edge) can still reach it. */
+  const leaveHover = (): void => {
+    hoverTimer.current = window.setTimeout(() => {
+      hoverTimer.current = null
+      setHovered(false)
+    }, HOVER_LEAVE_MS)
+  }
 
   /** Add a floating label that removes itself after its lifetime. */
   const pushFloater = (label: string, rainbow: boolean, ms: number = FLOATER_MS): void => {
@@ -302,8 +325,8 @@ export function Muyu({ t }: MuyuProps): ReactNode {
     <div
       className={clsx(css.root, hovered && css.hovered, dragging && css.dragging)}
       style={{ left: state.x, top: state.y }}
-      onMouseEnter={() => { setHovered(true) }}
-      onMouseLeave={() => { setHovered(false) }}
+      onMouseEnter={enterHover}
+      onMouseLeave={leaveHover}
     >
       <div className={clsx(css.fishRow, striking && css.struck)}>
         <div
