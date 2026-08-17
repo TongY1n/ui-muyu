@@ -225,6 +225,12 @@
   line-height: 16px;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+  /* The bubble grows with its content; only a practically-unreachable digit
+     run (15+ places) would overflow the window, so cap it with an ellipsis. */
+  max-width: 200px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .settings {
