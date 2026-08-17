@@ -20,7 +20,9 @@ Bundle plugins take effect after restarting the app.
 
 ## Usage note
 
-The fish first appears in the bottom-right corner of the window. If you don't see it after opening the app, it may be covered by another floating panel or plugin — temporarily close the covering panel, drag the fish somewhere unobstructed, then reopen the panel.
+The fish first appears in the bottom-right corner of the window. If you don't see it after opening the app, it may be covered by another floating panel or plugin
+
+Temporarily close the covering panel, drag the fish somewhere unobstructed, then reopen the panel.
 
 If it vanishes after a drag-and-release, it may have been dropped behind something — time to hunt down your missing fish (´▽｀)
 
