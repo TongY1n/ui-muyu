@@ -46,4 +46,4 @@ Bundle 插件需重启应用后生效。
 
 ## 致谢
 
-由 TongY1n 主持，DeepSeek-V4-Flash+Pro 活泼开发，GLM5.3 严肃审查，全程使用 DeepSeek-Harness。
+本次由 TongY1n 主持，DeepSeek-V4-Flash+Pro 活泼开发，GLM5.3 严肃审查，全程使用 DeepSeek-Harness。祝大家功德无量，快乐生活～

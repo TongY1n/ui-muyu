@@ -46,4 +46,4 @@ A purely decorative browser widget — nothing more:
 
 ## Acknowledgements
 
-Shepherded by TongY1n — lively development by DeepSeek-V4-Flash+Pro, serious review by GLM5.3, all on DeepSeek-Harness.
+This round was shepherded by TongY1n — lively development by DeepSeek-V4-Flash+Pro, serious review by GLM5.3, all on DeepSeek-Harness. May your merit be boundless and your days be happy!
