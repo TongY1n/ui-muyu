@@ -8,7 +8,7 @@ English | [中文](README.zh.md)
 
 A cyber wooden fish — a small floating widget in the web window. Tap it during work breaks to rack up some "merit".
 
-Click the fish to strike it; press and drag to move it anywhere. Progress survives page reloads — the rest is yours to discover~
+Click the fish to strike it; press and drag to move it anywhere. Progress survives page reloads — the rest is yours to discover!
 
 ## Install
 
@@ -20,7 +20,7 @@ Bundle plugins take effect after restarting the app.
 
 ## Usage note
 
-The fish first appears in the bottom-right corner of the window. If you don't see it after opening the app, it may be covered by another floating panel or plugin
+The fish first appears in the bottom-right corner of the window. If you don't see it after opening the app, it may be covered by another floating panel or plugin.
 
 Temporarily close the covering panel, drag the fish somewhere unobstructed, then reopen the panel.
 
@@ -28,7 +28,7 @@ If it vanishes after a drag-and-release, it may have been dropped behind somethi
 
 ## Known Limitations and Deferred Work
 
-- **No sounds** — a real wooden fish clicks; this one is deliberately silent.
+- **No sounds** — a real wooden fish goes *tok*; this one is deliberately silent.
 - **Merit, position, and color are per-browser** — stored in `localStorage` rather than the session log, so a new machine or browser starts fresh.
 
 ## Privacy & Permissions
