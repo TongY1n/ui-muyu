@@ -262,6 +262,14 @@
   pointer-events: auto;
 }
 
+/* Keyboard users: tabbing into the widget reveals the settings button even
+   without a pointer hover. */
+.root:focus-within .settings {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
 .settings:hover,
 .settings[aria-expanded='true'] {
   background: var(--dsw-alias-fill-l2);

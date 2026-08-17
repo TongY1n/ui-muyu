@@ -36,7 +36,7 @@
     }
   },
   "scripts": {
-    "build": "tsc --noEmit && tsdown",
+    "build": "tsc -p tsconfig.build.json && tsdown",
     "bundle": "tsdown",
     "watch": "tsdown --watch",
     "typecheck": "tsc --noEmit"
