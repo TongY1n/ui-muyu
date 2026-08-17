@@ -10,6 +10,14 @@ A cyber wooden fish — a small floating widget in the web window. Tap it during
 
 Click the fish to strike it; press and drag to move it anywhere. Progress survives page reloads — the rest is yours to discover~
 
+## Install
+
+```sh
+dsh plugin --profile web add github:TongY1n/ui-muyu
+```
+
+Bundle plugins take effect after restarting the app.
+
 ## Usage note
 
 The fish first appears in the bottom-right corner of the window. If you don't see it after opening the app, it may be covered by another floating panel or plugin — temporarily close the covering panel, drag the fish somewhere unobstructed, then reopen the panel.
@@ -20,3 +28,16 @@ If it vanishes after a drag-and-release, it may have been dropped behind somethi
 
 - **No sounds** — a real wooden fish clicks; this one is deliberately silent.
 - **Merit, position, and color are per-browser** — stored in `localStorage` rather than the session log, so a new machine or browser starts fresh.
+
+## Privacy & Permissions
+
+A purely decorative browser widget — nothing more:
+
+- **No network access** — it never makes a request.
+- **No API keys, credentials, or shell** — none are read, stored, or requested.
+- **No file, session, or conversation access** — DSH sessions and logs are left alone.
+- **`localStorage` only** — merit, position, and color live in the browser's `localStorage`, per-browser, and are cleared along with site data.
+
+## License
+
+[MIT](LICENSE)
