@@ -1,6 +1,6 @@
 {
   "name": "@deepseek-ai/dsh-client-ui-muyu",
-  "description": "一个赛博木鱼：可拖拽、点击敲击、累积功德的 Web 悬浮小部件。",
+  "description": "一个赛博木鱼：可拖拽、点击敲击、累积功德的 Web 悬浮小摆件",
   "version": "0.1.0",
   "type": "module",
   "main": "lib/index.js",
