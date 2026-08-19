@@ -2,8 +2,6 @@
 
 English | [中文](README.zh.md)
 
-[![dshfind](https://dshfind.com/api/card/TongY1n/ui-muyu)](https://dshfind.com/plugins/TongY1n/ui-muyu?ref=badge)
-
 <div align="center">
   <img src="docs/images/preview.png" width="220" alt="Cyber wooden fish preview" />
 </div>
