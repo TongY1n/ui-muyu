@@ -2,6 +2,8 @@
 
 [English](README.md) | 中文
 
+[![dshfind](https://dshfind.com/api/card/TongY1n/ui-muyu?lang=zh)](https://dshfind.com/zh/plugins/TongY1n/ui-muyu?ref=badge)
+
 <div align="center">
   <img src="docs/images/preview.png" width="220" alt="赛博木鱼预览" />
 </div>
