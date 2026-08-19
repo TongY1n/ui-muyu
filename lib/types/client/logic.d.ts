@@ -46,7 +46,7 @@ export declare const WIDGET_WIDTH = 148;
 /** Widget box height (fish + counter panel), used to clamp the anchor. */
 export declare const WIDGET_HEIGHT = 96;
 /** Number of fast-strike complaint messages (indexed in the `muyu` dictionary). */
-export declare const FAST_STRIKE_MESSAGE_COUNT = 5;
+export declare const FAST_STRIKE_MESSAGE_COUNT = 12;
 /** Fresh-state placement: bottom-right corner, clear of the app chrome. */
 export declare function defaultState(viewport: Viewport): MuyuState;
 /**

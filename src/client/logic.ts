@@ -66,7 +66,7 @@ const RANDOM_PALETTE = [
 ] as const
 
 /** Number of fast-strike complaint messages (indexed in the `muyu` dictionary). */
-export const FAST_STRIKE_MESSAGE_COUNT = 5
+export const FAST_STRIKE_MESSAGE_COUNT = 12
 
 /** Fresh-state placement: bottom-right corner, clear of the app chrome. */
 export function defaultState(viewport: Viewport): MuyuState {
