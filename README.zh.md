@@ -3,7 +3,7 @@
 [English](README.md) | 中文
 
 <div align="center">
-  <img src="docs/images/preview.png" width="220" alt="赛博木鱼预览" />
+  <img src="https://cdn.jsdelivr.net/gh/TongY1n/ui-muyu@main/docs/images/preview.png" width="220" alt="赛博木鱼预览" />
 </div>
 
 一个赛博木鱼 —— 悬浮在 Web 窗口里的木鱼小摆件，工作间隙敲一敲、攒一攒"功德"。
