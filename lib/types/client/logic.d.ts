@@ -27,7 +27,7 @@ export declare const DEFAULT_COLOR = "#a35c2f";
 export declare const RAINBOW_ODDS: number;
 /** Cumulative strikes after which the rainbow easter egg is guaranteed. */
 export declare const RAINBOW_GUARANTEE_COUNT = 100000;
-/** Per-strike crit odds: a crit adds 1..9 merit instead of 1. */
+/** Per-strike crit odds: a crit adds 2..9 merit instead of 1. */
 export declare const CRIT_ODDS = 0.05;
 /** Minimum strike interval in ms; below this the widget complains. */
 export declare const FAST_STRIKE_MS = 100;
@@ -45,8 +45,6 @@ export declare const STORAGE_KEY = "dsh-muyu.state.v1";
 export declare const WIDGET_WIDTH = 148;
 /** Widget box height (fish + counter panel), used to clamp the anchor. */
 export declare const WIDGET_HEIGHT = 96;
-/** Number of fast-strike complaint messages (indexed in the `muyu` dictionary). */
-export declare const FAST_STRIKE_MESSAGE_COUNT = 12;
 /** Fresh-state placement: bottom-right corner, clear of the app chrome. */
 export declare function defaultState(viewport: Viewport): MuyuState;
 /**
@@ -81,7 +79,7 @@ export declare function crossesFortune(previous: number, next: number): boolean;
  */
 export declare function rollGain(rand: () => number): number;
 /** Pick a fast-strike message index uniformly; the min() guard keeps a mocked rand() === 1 in range. */
-export declare function pickFastStrikeMessage(rand: () => number): number;
+export declare function pickFastStrikeMessage(rand: () => number, count: number): number;
 /** Clamp an anchor into the viewport, tolerating viewports smaller than the widget. */
 export declare function clampPosition(x: number, y: number, viewport: Viewport): {
     x: number;

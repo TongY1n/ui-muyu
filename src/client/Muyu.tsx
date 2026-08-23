@@ -4,7 +4,7 @@ import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots
 // Type-only: pulls ui-layout's SlotMap merge (the 'shell.overlay' key) into this program.
 import type {} from '@deepseek-ai/dsh-client-ui-layout/client'
 import css from './Muyu.module.css'
-import { NS } from './locales.ts'
+import { BUBBLE_KEYS, NS } from './locales.ts'
 import {
   BUBBLE_MS, clampPosition, crossesFortune, FAST_STRIKE_MS, FORTUNE_MS, loadState,
   pickFastStrikeMessage, randomColor, rollColorShift, rollGain, rollRainbow, safeStorage,
@@ -49,13 +49,6 @@ const HOVER_LEAVE_MS = 1_000
 
 /** Quick-pick body colors shown in the settings popover. */
 const PRESET_COLORS = ['#a35c2f', '#c0392b', '#2980b9', '#27ae60', '#8e44ad', '#e67e22'] as const
-
-/** Fast-strike complaint dictionary keys, indexed by pickFastStrikeMessage. */
-const BUBBLE_KEYS = [
-  'bubble.0', 'bubble.1', 'bubble.2', 'bubble.3',
-  'bubble.4', 'bubble.5', 'bubble.6', 'bubble.7',
-  'bubble.8', 'bubble.9', 'bubble.10', 'bubble.11',
-] as const
 
 /** The current viewport (the widget clamps itself inside it). */
 function viewport(): Viewport {
@@ -212,7 +205,7 @@ export function Muyu({ t }: MuyuProps): ReactNode {
   }
 
   /**
-   * One strike: gain merit (1, or a crit of 1..9 at the stated odds), swing
+   * One strike: gain merit (1, or a crit of 2..9 at the stated odds), swing
    * the mallet, float the gain in gold, roll the rainbow, and complain when
    * strikes arrive faster than the fish can absorb.
    */
@@ -239,10 +232,9 @@ export function Muyu({ t }: MuyuProps): ReactNode {
     pushFloater(gain > 1 ? t('strike.crit', { gain }) : t('strike.plus'), false)
     if (shift) pushFloater(t('color.shift'), false)
     if (fast) {
-      // The index is clamped to [0, FAST_STRIKE_MESSAGE_COUNT); the fallback
-      // is unreachable and exists only for the noUncheckedIndexedAccess view.
-      /* v8 ignore next 1 -- pickFastStrikeMessage clamps the index */
-      pushBubble(t(BUBBLE_KEYS[pickFastStrikeMessage(Math.random)] ?? 'bubble.0'))
+      // The pool and its size come from the same derived list, so the index
+      // is always in range — no silent fallback.
+      pushBubble(t(BUBBLE_KEYS[pickFastStrikeMessage(Math.random, BUBBLE_KEYS.length)]))
     }
     window.setTimeout(() => { setStriking(false) }, SWING_MS)
   }

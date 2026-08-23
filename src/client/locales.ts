@@ -59,3 +59,10 @@ export const en: Record<MuyuKey, string> = {
 
 /** Key domain of the `muyu` namespace (zh is the source of truth). */
 export type MuyuKey = keyof typeof zh
+
+/** Fast-strike bubble keys in display order, derived from the zh dictionary so
+ * the pool, its size and the translations cannot drift apart. */
+const BUBBLE_KEY_RE = /^bubble\.\d+$/
+export const BUBBLE_KEYS = Object.keys(zh)
+  .filter((key): key is MuyuKey => BUBBLE_KEY_RE.test(key))
+  .sort((a, b) => Number(a.slice('bubble.'.length)) - Number(b.slice('bubble.'.length)))

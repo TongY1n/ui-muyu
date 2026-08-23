@@ -33,7 +33,7 @@ export const RAINBOW_ODDS = 1 / 100_000
 /** Cumulative strikes after which the rainbow easter egg is guaranteed. */
 export const RAINBOW_GUARANTEE_COUNT = 100_000
 
-/** Per-strike crit odds: a crit adds 1..9 merit instead of 1. */
+/** Per-strike crit odds: a crit adds 2..9 merit instead of 1. */
 export const CRIT_ODDS = 0.05
 
 /** Minimum strike interval in ms; below this the widget complains. */
@@ -64,9 +64,6 @@ const RANDOM_PALETTE = [
   '#c0392b', '#e67e22', '#d4ac0d', '#27ae60', '#16a085',
   '#2980b9', '#8e44ad', '#d35400', '#7f8c8d', '#2c3e50',
 ] as const
-
-/** Number of fast-strike complaint messages (indexed in the `muyu` dictionary). */
-export const FAST_STRIKE_MESSAGE_COUNT = 12
 
 /** Fresh-state placement: bottom-right corner, clear of the app chrome. */
 export function defaultState(viewport: Viewport): MuyuState {
@@ -132,8 +129,8 @@ function pickOne<T>(items: readonly T[], rand: () => number): T {
 }
 
 /** Pick a fast-strike message index uniformly; the min() guard keeps a mocked rand() === 1 in range. */
-export function pickFastStrikeMessage(rand: () => number): number {
-  return Math.min(FAST_STRIKE_MESSAGE_COUNT - 1, Math.floor(rand() * FAST_STRIKE_MESSAGE_COUNT))
+export function pickFastStrikeMessage(rand: () => number, count: number): number {
+  return Math.min(count - 1, Math.floor(rand() * count))
 }
 
 /** Clamp an anchor into the viewport, tolerating viewports smaller than the widget. */
