@@ -1,8 +1,40 @@
+/* The shadow host has no layout box. Protect this boundary itself from page
+   resets; descendants need no !important rules because selectors cannot cross. */
+:host {
+  all: initial !important;
+  display: contents !important;
+  color-scheme: inherit !important;
+}
+
+:where(.root, .root *, .root *::before, .root *::after) {
+  box-sizing: border-box;
+}
+
+:where(button, input) {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+}
+
+:where(button) {
+  appearance: none;
+  text-align: center;
+}
+
 .root {
+  all: initial;
+  box-sizing: border-box;
+  direction: ltr;
+  font: 400 12px/1.35 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--muyu-text);
   /* Component-local presentation colors: merit gold and the rainbow glow are
      this widget's own contract, not shared theme tokens. */
   --muyu-gold: #ffd700;
   --muyu-gold-glow: rgba(255, 215, 0, 0.35);
+  --muyu-fish-radius: 46% 54% 54% 46% / 52% 50% 50% 48%;
   --muyu-rainbow-conic: conic-gradient(#f00, #ff8000, #ff0, #0f0, #0af, #80f, #f0f, #f00);
   --muyu-rainbow-linear: linear-gradient(90deg, #f00, #ff8000, #ff0, #0f0, #0af, #80f, #f0f);
   --muyu-face: rgba(30, 18, 8, 0.85);
@@ -12,6 +44,20 @@
   --muyu-glow-from: 0 0 8px 2px rgba(255, 0, 80, 0.55), 0 0 20px 6px rgba(128, 0, 255, 0.35);
   --muyu-glow-to: 0 0 14px 4px rgba(0, 255, 200, 0.6), 0 0 30px 10px rgba(255, 128, 0, 0.45);
 
+  /* Only theme colors cross the shadow boundary. System colors are the
+     fallback if a host token disappears; geometry and shadows are local. */
+  --muyu-surface: var(--dsw-specific-menu, Canvas);
+  --muyu-border: var(--dsw-alias-border-l2, color-mix(in srgb, CanvasText 18%, Canvas));
+  --muyu-border-strong: var(--dsw-alias-border-l3, color-mix(in srgb, CanvasText 40%, Canvas));
+  --muyu-fill-hover: var(--dsw-alias-fill-l2, color-mix(in srgb, CanvasText 10%, Canvas));
+  --muyu-fill-active: var(--dsw-alias-fill-l3, color-mix(in srgb, CanvasText 18%, Canvas));
+  --muyu-text: var(--dsw-alias-label-secondary, CanvasText);
+  --muyu-text-muted: var(--dsw-alias-label-tertiary, color-mix(in srgb, CanvasText 65%, Canvas));
+  --muyu-text-strong: var(--dsw-alias-label-primary, CanvasText);
+  --muyu-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  --muyu-shadow-soft: 0 2px 6px rgba(0, 0, 0, 0.24);
+
+  color-scheme: inherit;
   position: fixed;
   z-index: 20;
   display: flex;
@@ -33,6 +79,10 @@
 
 .fishRow {
   position: relative;
+  width: 64px;
+  height: 64px;
+  flex: none;
+  overflow: visible;
   pointer-events: auto;
 }
 
@@ -41,8 +91,11 @@
   width: 64px;
   height: 64px;
   border: 3px solid;
-  border-radius: 46% 54% 54% 46% / 52% 50% 50% 48%;
-  box-shadow: var(--dsw-shadow-lv2), inset 0 0 14px var(--muyu-fish-inset);
+  /* Keep the original README silhouette: a hand-shaped, subtly irregular
+     circle. This is intentionally different from a mathematically perfect
+     circle and must remain local to the shadow tree. */
+  border-radius: var(--muyu-fish-radius);
+  box-shadow: var(--muyu-shadow), inset 0 0 14px var(--muyu-fish-inset);
   /* The hovering mallet icon is the strike affordance; the pointer stays the
      plain arrow so the two never double up. */
   cursor: default;
@@ -50,18 +103,8 @@
 }
 
 .fish:focus-visible {
-  box-shadow: var(--dsw-shadow-lv3), 0 0 0 2px var(--dsw-alias-border-l3);
-}
-
-/* Strike feedback: the fish dips and the mallet swings (struck lives on the row). */
-.struck .fish {
-  animation: fishShake 240ms ease;
-}
-
-@keyframes fishShake {
-  0% { transform: translateY(0) rotate(0deg); }
-  35% { transform: translateY(2px) rotate(-5deg); }
-  100% { transform: translateY(0) rotate(0deg); }
+  outline: 2px solid var(--muyu-border-strong);
+  outline-offset: 3px;
 }
 
 .eye {
@@ -87,9 +130,30 @@
 
 /* Rainbow easter egg: animated conic gradient + breathing multi-color glow. */
 .rainbow {
-  border-color: transparent;
+  /* Match main exactly: the rainbow uses the same lightly irregular fish
+     silhouette, and its gradient also paints the transparent border area.
+     Keeping the default border-box behavior prevents a dark host background
+     from showing through as a black inner edge. */
+  border-radius: var(--muyu-fish-radius);
+  overflow: visible;
+  /* Keep main's transparent 3px rim. The gradient paints that rim because
+     the background is explicitly clipped to the border box, so it remains a
+     colored silhouette without exposing the host as a black ring. */
+  border: 3px solid transparent;
   background: var(--muyu-rainbow-conic);
+  background-clip: border-box;
+  background-origin: border-box;
+  /* Do not inherit the wooden fish's inset shadow in the rainbow state. The
+     main rainbow effect uses only its animated multi-color glow. */
+  box-shadow: var(--muyu-glow-from);
   animation: rainbowHue 2.4s linear infinite, rainbowGlow 1.1s ease-in-out infinite alternate;
+}
+
+/* Keep keyboard focus visible without adding an inner border. currentColor
+   follows the active theme through the local root color variable. */
+.rainbow:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
 }
 
 @keyframes rainbowHue {
@@ -102,21 +166,17 @@
   to { box-shadow: var(--muyu-glow-to); }
 }
 
-/* The hovering mallet icon: fades in on hover, swings on strike, follows the
-   fish color (inline fills carry the shaded wood tones). */
+/* The mallet stays visible like the README reference and swings on strike.
+   Its wood tones follow the fish color (inline fills carry the shaded tones). */
 .mallet {
   position: absolute;
   top: -34px;
   left: 50%;
   transform: translateX(-50%) rotate(30deg);
   transform-origin: 65% 95%;
-  opacity: 0;
+  opacity: 1;
   pointer-events: none;
   transition: opacity 140ms ease;
-}
-
-.hovered .mallet {
-  opacity: 1;
 }
 
 .struck .mallet {
@@ -190,11 +250,11 @@
 
 .bubble {
   padding: 4px 8px;
-  border: 1px solid var(--dsw-alias-border-l2);
+  border: 1px solid var(--muyu-border);
   border-radius: 8px;
-  background: var(--dsw-specific-menu);
-  box-shadow: var(--dsw-shadow-lv3);
-  color: var(--dsw-alias-label-secondary);
+  background: var(--muyu-surface);
+  box-shadow: var(--muyu-shadow);
+  color: var(--muyu-text);
   font-size: 11px;
   line-height: 15px;
   white-space: nowrap;
@@ -216,11 +276,11 @@
 
 .count {
   padding: 4px 10px;
-  border: 1px solid var(--dsw-alias-border-l2);
+  border: 1px solid var(--muyu-border);
   border-radius: 10px;
-  background: var(--dsw-specific-menu);
-  box-shadow: var(--dsw-shadow-lv2);
-  color: var(--dsw-alias-label-secondary);
+  background: var(--muyu-surface);
+  box-shadow: var(--muyu-shadow-soft);
+  color: var(--muyu-text);
   font-size: 12px;
   line-height: 16px;
   font-variant-numeric: tabular-nums;
@@ -247,11 +307,11 @@
   width: 28px;
   height: 28px;
   padding: 0;
-  border: 1px solid var(--dsw-alias-border-l2);
+  border: 1px solid var(--muyu-border);
   border-radius: 10px;
-  background: var(--dsw-specific-menu);
-  box-shadow: var(--dsw-shadow-lv2);
-  color: var(--dsw-alias-label-tertiary);
+  background: var(--muyu-surface);
+  box-shadow: var(--muyu-shadow-soft);
+  color: var(--muyu-text-muted);
   font-size: 12px;
   line-height: 1;
   letter-spacing: 1px;
@@ -276,10 +336,18 @@
   pointer-events: auto;
 }
 
+.settings:focus-visible,
+.swatch:focus-visible,
+.action:focus-visible,
+.actionReset:focus-visible {
+  outline: 2px solid var(--muyu-border-strong);
+  outline-offset: 2px;
+}
+
 .settings:hover,
 .settings[aria-expanded='true'] {
-  background: var(--dsw-alias-fill-l2);
-  color: var(--dsw-alias-label-primary);
+  background: var(--muyu-fill-hover);
+  color: var(--muyu-text-strong);
 }
 
 .popover {
@@ -292,31 +360,35 @@
   align-items: center;
   gap: 6px;
   width: max-content;
+  max-width: calc(100vw - 16px);
   padding: 6px 8px;
-  border: 1px solid var(--dsw-alias-border-l2);
+  border: 1px solid var(--muyu-border);
   border-radius: 10px;
-  background: var(--dsw-specific-menu);
-  box-shadow: var(--dsw-shadow-lv3);
+  background: var(--muyu-surface);
+  box-shadow: var(--muyu-shadow);
   z-index: 1;
 }
 
 .tools {
   display: flex;
   align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
   gap: 4px;
 }
 
 .swatch {
-  width: 16px;
-  height: 16px;
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
   padding: 0;
-  border: 1px solid var(--dsw-alias-border-l2);
+  border: 1px solid var(--muyu-border);
   border-radius: 50%;
   cursor: pointer;
 }
 
 .swatch[aria-pressed='true'] {
-  outline: 2px solid var(--dsw-alias-border-l3);
+  outline: 2px solid var(--muyu-border-strong);
   outline-offset: 1px;
 }
 
@@ -333,16 +405,17 @@
   border: 0;
   border-radius: 6px;
   padding: 2px 6px;
-  background: var(--dsw-alias-fill-l2);
-  color: var(--dsw-alias-label-secondary);
+  background: var(--muyu-fill-hover);
+  color: var(--muyu-text);
   font-size: 11px;
   line-height: 16px;
+  white-space: nowrap;
   cursor: pointer;
 }
 
 .action:hover {
-  background: var(--dsw-alias-fill-l3);
-  color: var(--dsw-alias-label-primary);
+  background: var(--muyu-fill-active);
+  color: var(--muyu-text-strong);
 }
 
 .actionReset {
@@ -351,20 +424,21 @@
   border-radius: 6px;
   padding: 3px 0;
   background: transparent;
-  color: var(--dsw-alias-label-tertiary);
+  color: var(--muyu-text-muted);
   font-size: 11px;
   line-height: 16px;
   cursor: pointer;
 }
 
 .actionReset:hover {
-  background: var(--dsw-alias-fill-l3);
-  color: var(--dsw-alias-label-primary);
+  background: var(--muyu-fill-active);
+  color: var(--muyu-text-strong);
 }
 
-/* Respect reduced-motion: freeze the infinite rainbow flow and mallet hue
-   rotation; the fish stays visibly rainbow, just not animated. */
+/* Respect reduced-motion: freeze the infinite rainbow flow and mallet swing;
+   the fish remains visibly in its selected state. */
 @media (prefers-reduced-motion: reduce) {
+  .struck .mallet,
   .rainbow,
   .malletRainbow,
   .struck .malletRainbow {

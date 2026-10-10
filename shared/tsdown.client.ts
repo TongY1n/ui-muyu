@@ -6,16 +6,16 @@
  * ({id, factory}) and resolves externals through the injected require
  * (loader module table — cordis DI entities, no globals, no import map).
  * CSS Modules are compiled by lightningcss inside the bundle: importing
- * `x.module.css` yields the hashed class map, and the css text auto-injects
- * a <style data-plugin="<id>"> tag at factory execution (the loader removes
- * plugin-owned tags on unload). The virtual loader registers each real
+ * `x.module.css` yields the hashed class map and a named cssText export.
+ * The component mounts its stylesheet inside its shadow root; importing CSS
+ * never writes to document.head. The virtual loader registers each real
  * stylesheet as a watch dependency. The platform module list mirrors the
  * shell's seed table in `./web-platform.ts`.
  */
 import { readFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { createRequire } from 'node:module'
-import { basename, dirname, relative, resolve as resolvePath, sep } from 'node:path'
+import { dirname, relative, resolve as resolvePath, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { UserConfig } from 'tsdown'
 import { transform } from 'lightningcss'
@@ -46,20 +46,8 @@ const GENERATED_REMOTE = /^@deepseek-ai\/dsh-[a-z0-9]+(?:-[a-z0-9]+)*\/remote$/
  */
 const SKIP_WORKSPACE_BUILD: UserConfig = { entry: '' }
 
-/**
- * Documented TEMPORARY exemption, not a platform module (hence not in
- * web-platform.ts): the snapshot-store engine (createSnapshotStore/defineStore/
- * shallowEqual) lives in runtime pending its promotion-time rehoming, and
- * five importers (locale, ui-layout, ui-conversation ×3) ride this single
- * exemption. At runtime the lazy CJS table answers the require natively:
- * runtime is an immediately-tier row, its factory is registered before any
- * dependent bundle materializes. TODO(webload/store-rehome): remove with the
- * store-engine relocation follow-up.
- */
-const RUNTIME_STORE_EXEMPTION = '@deepseek-ai/dsh-client-runtime/client'
-
-/** Externals resolved from the loader module table: the platform seed entries plus the documented runtime exemption. */
-export const CLIENT_EXTERNALS: readonly string[] = [...PLATFORM_MODULES, RUNTIME_STORE_EXEMPTION]
+/** Externals resolved from the latest DSH platform seed table. */
+export const CLIENT_EXTERNALS: readonly string[] = [...PLATFORM_MODULES]
 
 const REPOSITORY_ROOT = fileURLToPath(new URL('..', import.meta.url))
 
@@ -82,8 +70,8 @@ function browserSourcePath(source: string, sourcemapPath: string): string {
  * @param id - plugin id (package name), stamped into the __ModuleLoader__.load
  * handoff and onto the injected style tags.
  * @param libEntry - node-half entries, spelled at the call site so the
- * package-invariants gate can see `src/invariant.ts` (or the tsc emit path) in
- * each package's own tsdown.config.ts.
+ * package entry list can keep the node half explicit in each package's own
+ * tsdown.config.ts.
  * @param options - phase placement, lib overrides, companion Node configs.
  * @returns ENV-selected tsdown config for the current build face.
  */
@@ -127,8 +115,7 @@ export function mobileBundle(id: string, entry: string): UserConfig {
     sourcemap: true,
     clean: false,
     // Fully self-contained: no externals, no module table.
-    external: [],
-    noExternal: [/.*/],
+    deps: { alwaysBundle: [/.*/] },
     define: {
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV ?? 'production'),
       'import.meta.env.MODE': JSON.stringify(process.env.NODE_ENV ?? 'production'),
@@ -195,7 +182,7 @@ function clientLibraryConfig(
     // from this repo's install; its built declarations carry .ts-suffixed
     // relative imports rolldown cannot follow, so the import must stay
     // external (the same stance as the peer APIs above).
-    external: ['@deepseek-ai/cordis', ...extraExternal],
+    deps: { neverBundle: ['@deepseek-ai/cordis', ...extraExternal] },
     ...overrides,
   }
 }
@@ -216,7 +203,11 @@ function clientConfig(id: string, entry: string): UserConfig {
     // must carry the TS/TSX mapping consumed by browser profiling tools.
     sourcemap: true,
     clean: false,
-    external: [...CLIENT_EXTERNALS],
+    deps: {
+      neverBundle: [...CLIENT_EXTERNALS],
+      alwaysBundle: (id: string) => !CLIENT_EXTERNALS.includes(id),
+      onlyBundle: false,
+    },
     // Browser bundles inline node-idiom deps (zustand/immer read
     // process.env.NODE_ENV; zustand's esm build also probes
     // import.meta.env.MODE, which a CJS output cannot carry — rolldown flags
@@ -237,7 +228,6 @@ function clientConfig(id: string, entry: string): UserConfig {
     // every non-shared dep). A require() the table cannot answer is a
     // guaranteed runtime throw, so the rule is the table list itself: no
     // opinion for table entries (external above wins), bundle everything else.
-    noExternal: (id: string) => (CLIENT_EXTERNALS.includes(id) ? undefined : true),
     plugins: [{
       // Bundle purity gate (build-time mirror of the module-edge rules):
       // platform seed entries stay external, inline-safe wire layers inline,
@@ -281,17 +271,9 @@ function clientConfig(id: string, entry: string): UserConfig {
         for (const [local, exp] of Object.entries(cssExports ?? {}).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)) {
           classMap[local] = exp.name
         }
-        // One <style data-plugin> per module file; idempotent under re-evaluation.
+        // Keep styles in the same lifetime and DOM boundary as the component.
         return [
-          `const css = ${JSON.stringify(code.toString())};`,
-          `const tagId = ${JSON.stringify(`${id}/${basename(fileId)}`)};`,
-          'if (typeof document !== \'undefined\' && document.querySelector(\'style[data-plugin-css=\' + JSON.stringify(tagId) + \']\') === null) {',
-          '  const tag = document.createElement(\'style\');',
-          `  tag.dataset.plugin = ${JSON.stringify(id)};`,
-          '  tag.dataset.pluginCss = tagId;',
-          '  tag.textContent = css;',
-          '  document.head.appendChild(tag);',
-          '}',
+          `export const cssText = ${JSON.stringify(code.toString())};`,
           `export default ${JSON.stringify(classMap)};`,
         ].join('\n')
       },

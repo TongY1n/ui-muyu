@@ -36,8 +36,12 @@ export const RAINBOW_GUARANTEE_COUNT = 100_000
 /** Per-strike crit odds: a crit adds 2..9 merit instead of 1. */
 export const CRIT_ODDS = 0.05
 
-/** Minimum strike interval in ms; below this the widget complains. */
-export const FAST_STRIKE_MS = 100
+/**
+ * Minimum strike interval in ms; below this the widget complains.
+ * 200ms is intentional: it restores the fast-strike feedback for ordinary
+ * human pointer/keyboard taps after the old 100ms window became too narrow.
+ */
+export const FAST_STRIKE_MS = 200
 
 /** Fast-strike bubble lifetime in ms. */
 export const BUBBLE_MS = 5_000
@@ -56,7 +60,7 @@ export const STORAGE_KEY = 'dsh-muyu.state.v1'
 
 /** Widget box width, used to clamp the anchor inside the viewport. */
 export const WIDGET_WIDTH = 148
-/** Widget box height (fish + counter panel), used to clamp the anchor. */
+/** Widget box height (64px fish + 6px gap + 26px counter), used to clamp the anchor. */
 export const WIDGET_HEIGHT = 96
 
 /** Pleasant hex palette the random button draws from (hex keeps the native color input valid). */

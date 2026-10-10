@@ -6,7 +6,7 @@
  * `slots.inject`, so apply order never matters and a layout redeclaration
  * re-installs it.
  */
-import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client';
+import type { Context as ClientContext } from '@deepseek-ai/cordis';
 import { type MuyuKey } from './locales.ts';
 declare module '@deepseek-ai/dsh-client-ui-slots' {
     interface LocaleNamespaceMap {

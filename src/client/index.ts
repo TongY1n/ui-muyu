@@ -6,11 +6,13 @@
  * `slots.inject`, so apply order never matters and a layout redeclaration
  * re-installs it.
  */
-import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
+import type { Context as ClientContext } from '@deepseek-ai/cordis'
 // Type-only: pulls the locale plugin's Context merge (ctx.locale).
 import type {} from '@deepseek-ai/dsh-client-locale/client'
 // Type-only: pulls ui-layout's SlotMap merge (the 'shell.overlay' key).
 import type {} from '@deepseek-ai/dsh-client-ui-layout/client'
+// Type-only: pulls the renderer-owned SlotRegistry service merge (ctx.slots).
+import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import { Muyu } from './Muyu.tsx'
 import { en, NS, zh, type MuyuKey } from './locales.ts'
 

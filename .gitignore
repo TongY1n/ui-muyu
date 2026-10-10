@@ -3,3 +3,7 @@ node_modules/
 pnpm-debug.log
 coverage/
 .DS_Store
+
+.playwright-cli/
+
+.browser-harness.*

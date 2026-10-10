@@ -1,9 +1,10 @@
-import { useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react'
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import clsx from 'clsx'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 // Type-only: pulls ui-layout's SlotMap merge (the 'shell.overlay' key) into this program.
 import type {} from '@deepseek-ai/dsh-client-ui-layout/client'
-import css from './Muyu.module.css'
+import css, { cssText } from './Muyu.module.css'
 import { BUBBLE_KEYS, NS } from './locales.ts'
 import {
   BUBBLE_MS, clampPosition, crossesFortune, FAST_STRIKE_MS, FORTUNE_MS, loadState,
@@ -14,6 +15,26 @@ import {
 
 /** Full props for the frame-overlay wooden fish entry. */
 export type MuyuProps = PropsRuntime<'shell.overlay'> & PropsLocale<typeof NS>
+
+/** Keep the complete widget and stylesheet behind one CSS boundary. A portal
+ * preserves the DSH locale/context while React owns mounting and cleanup. */
+export function Muyu(props: MuyuProps): ReactNode {
+  const [shadowRoot, setShadowRoot] = useState<ShadowRoot | null>(null)
+  const attach = useCallback((host: HTMLDivElement | null): void => {
+    if (host !== null) setShadowRoot(host.shadowRoot ?? host.attachShadow({ mode: 'open' }))
+  }, [])
+  return (
+    <div ref={attach} data-muyu-host="">
+      {shadowRoot === null ? null : createPortal(
+        <>
+          <style>{cssText}</style>
+          <MuyuWidget {...props} />
+        </>,
+        shadowRoot,
+      )}
+    </div>
+  )
+}
 
 /** One floating merit label, removed by its own timer. */
 interface Floater {
@@ -105,7 +126,7 @@ function MalletIcon({ color, rainbow }: { color: string; rainbow: boolean }): Re
  * @param props - the locale seat.
  * @returns the floating widget.
  */
-export function Muyu({ t }: MuyuProps): ReactNode {
+function MuyuWidget({ t }: MuyuProps): ReactNode {
   const [state, setState] = useState<MuyuState>(() => loadState(safeStorage(), viewport()))
   const [hovered, setHovered] = useState(false)
   const hoverTimer = useRef<number | null>(null)
@@ -124,6 +145,30 @@ export function Muyu({ t }: MuyuProps): ReactNode {
   const countRef = useRef(state.count)
   const lastStrikeAt = useRef<number | null>(null)
   const panelRef = useRef<HTMLDivElement | null>(null)
+  const popoverRef = useRef<HTMLDivElement | null>(null)
+
+  // Keep the full color/reset panel reachable near every viewport edge.
+  useLayoutEffect(() => {
+    if (!settingsOpen) return
+    const placePopover = (): void => {
+      const popover = popoverRef.current
+      if (popover === null) return
+      popover.style.top = ''
+      popover.style.bottom = ''
+      popover.style.transform = ''
+      if (popover.getBoundingClientRect().bottom > window.innerHeight - 8) {
+        popover.style.top = 'auto'
+        popover.style.bottom = 'calc(100% + 6px)'
+      }
+      const rect = popover.getBoundingClientRect()
+      const left = Math.max(8, Math.min(rect.left, window.innerWidth - rect.width - 8))
+      const top = Math.max(8, rect.top)
+      popover.style.transform = `translate(${left - rect.left}px, ${top - rect.top}px)`
+    }
+    placePopover()
+    window.addEventListener('resize', placePopover)
+    return () => { window.removeEventListener('resize', placePopover) }
+  }, [settingsOpen, state.x, state.y, t])
 
   // Persist every change (position, count, color, rainbow) to localStorage.
   useEffect(() => {
@@ -161,7 +206,9 @@ export function Muyu({ t }: MuyuProps): ReactNode {
       // is unreachable — the check exists only for the type system.
       /* v8 ignore next 2 -- panelRef is bound whenever the popover is open */
       if (panelRef.current === null) return
-      if (event.target instanceof Node && panelRef.current.contains(event.target)) return
+      // document sees the shadow host as event.target. Inspect the composed
+      // path so pressing a color/reset button doesn't close it before click.
+      if (event.composedPath().includes(panelRef.current)) return
       setSettingsOpen(false)
     }
     document.addEventListener('pointerdown', onPress)
@@ -305,14 +352,12 @@ export function Muyu({ t }: MuyuProps): ReactNode {
     setState(prev => ({ ...prev, count: 0, rainbow: false }))
   }
 
-  // The body gradient adapts to the user color; rainbow mode replaces the
-  // background entirely with the animated conic gradient, so no inline style.
-  const fishStyle: CSSProperties | undefined = state.rainbow
-    ? undefined
-    : {
-      background: `linear-gradient(145deg, ${shade(state.color, 1.18)} 0%, ${state.color} 45%, ${shade(state.color, 0.72)} 100%)`,
-      borderColor: shade(state.color, 0.6),
-    }
+  // Shape, border width and shading are local CSS; only the selected body
+  // color is dynamic. No host rule can override these shadow-tree elements.
+  const fishStyle: CSSProperties | undefined = state.rainbow ? undefined : {
+    background: `linear-gradient(145deg, ${shade(state.color, 1.18)} 0%, ${state.color} 45%, ${shade(state.color, 0.72)} 100%)`,
+    borderColor: shade(state.color, 0.6),
+  }
 
   // Merit text turns gold once strikes have landed.
   const golden = state.count > 0
@@ -337,7 +382,7 @@ export function Muyu({ t }: MuyuProps): ReactNode {
           <span className={css.eye} />
           <span className={css.slot} />
         </div>
-        {hovered ? <MalletIcon color={state.color} rainbow={state.rainbow} /> : null}
+        <MalletIcon color={state.color} rainbow={state.rainbow} />
         <span className={css.floaters}>
           {floaters.map(floater => (
             <span key={floater.id} className={clsx(css.floater, floater.rainbow && css.floaterRainbow)}>
@@ -370,7 +415,7 @@ export function Muyu({ t }: MuyuProps): ReactNode {
         </button>
         {settingsOpen
           ? (
-            <div className={css.popover}>
+            <div ref={popoverRef} className={css.popover}>
               <div className={css.tools}>
                 {PRESET_COLORS.map(color => (
                   <button
