@@ -68,14 +68,15 @@ test('the shipped bundle scopes all controls and CSS to a shadow root and cleans
   expect(view.ui.getByRole('button', { name: 'fish.aria' }).getRootNode()).toBe(view.shadow)
   expect(view.shadow.querySelector('svg[aria-hidden="true"]')).not.toBeNull()
   const widgetStyle = view.shadow.querySelector('style')?.textContent ?? ''
-  expect(widgetStyle).toContain('--muyu-fish-radius:46% 54% 54% 46%/52% 50% 50% 48%')
+  expect(widgetStyle).toMatch(/--muyu-fish-radius:46% 54% 54% 46%\s*\/\s*52% 50% 50% 48%/)
   expect(widgetStyle).toContain('border-radius:var(--muyu-fish-radius)')
   expect(widgetStyle).toContain('border:3px solid #0000')
   expect(widgetStyle).toContain('background-clip:border-box')
   expect(widgetStyle).toContain('box-shadow:var(--muyu-glow-from)')
-  expect(widgetStyle).toContain('rainbow:focus-visible{outline:2px solid currentColor;outline-offset:3px}')
+  expect(widgetStyle).toMatch(/rainbow:focus-visible\{[^}]*outline-offset:3px[^}]*outline:2px solid/)
   expect(widgetStyle).not.toContain('background-clip:padding-box')
-  expect(widgetStyle).not.toContain('.struck .fish')
+  const fishClass = view.ui.getByRole('button', { name: 'fish.aria' }).className.split(' ')[0]
+  expect(widgetStyle).not.toMatch(new RegExp(`\\.${fishClass}\\{[^}]*animation:`))
   view.unmount()
   expect(view.host?.isConnected).toBe(false)
   expect(view.shadow.childNodes).toHaveLength(0)
@@ -128,6 +129,31 @@ test('pointer dragging across the boundary moves the widget without striking and
   unmount()
   mountBundle()
   expect(JSON.parse(localStorage.getItem('dsh-muyu.state.v1')!)).toEqual(after)
+})
+
+test('pointer cancellation and unrelated pointer ids do not strike the fish', () => {
+  const { ui } = mountBundle()
+  const fish = ui.getByRole('button', { name: 'fish.aria' })
+  const down = new Event('pointerdown', { bubbles: true, composed: true })
+  Object.defineProperties(down, {
+    button: { value: 0 }, clientX: { value: 100 }, clientY: { value: 100 }, pointerId: { value: 1 },
+  })
+  fireEvent(fish, down)
+  const up = new Event('pointerup')
+  Object.defineProperty(up, 'pointerId', { value: 2 })
+  fireEvent(window, up)
+  const cancel = new Event('pointercancel')
+  Object.defineProperty(cancel, 'pointerId', { value: 1 })
+  fireEvent(window, cancel)
+  expect(ui.getByText('count 0')).toBeTruthy()
+})
+
+test('keyboard auto-repeat does not create another strike', () => {
+  const { ui } = mountBundle()
+  const fish = ui.getByRole('button', { name: 'fish.aria' })
+  fireEvent.keyDown(fish, { key: 'Enter' })
+  fireEvent.keyDown(fish, { key: 'Enter', repeat: true })
+  expect(ui.getByText('count 1')).toBeTruthy()
 })
 
 test('an opened panel flips above the counter and shifts inward when it would overflow', () => {

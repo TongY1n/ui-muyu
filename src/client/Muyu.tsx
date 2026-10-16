@@ -51,6 +51,7 @@ interface Bubble {
 
 /** An in-flight drag session (null when idle). */
 interface DragSession {
+  pointerId: number
   startX: number
   startY: number
   originX: number
@@ -136,7 +137,12 @@ function MuyuWidget({ t }: MuyuProps): ReactNode {
   const [bubbles, setBubbles] = useState<Bubble[]>([])
   const [settingsOpen, setSettingsOpen] = useState(false)
   const dragRef = useRef<DragSession | null>(null)
-  const listenersRef = useRef<{ move: (event: PointerEvent) => void; up: () => void } | null>(null)
+  const listenersRef = useRef<{
+    move: (event: PointerEvent) => void
+    up: (event: PointerEvent) => void
+    cancel: (event: PointerEvent) => void
+  } | null>(null)
+  const timersRef = useRef<Set<number>>(new Set())
   const floaterId = useRef(0)
   const bubbleId = useRef(0)
   const prevRainbow = useRef(state.rainbow)
@@ -162,7 +168,7 @@ function MuyuWidget({ t }: MuyuProps): ReactNode {
       }
       const rect = popover.getBoundingClientRect()
       const left = Math.max(8, Math.min(rect.left, window.innerWidth - rect.width - 8))
-      const top = Math.max(8, rect.top)
+      const top = Math.min(Math.max(8, rect.top), Math.max(8, window.innerHeight - rect.height - 8))
       popover.style.transform = `translate(${left - rect.left}px, ${top - rect.top}px)`
     }
     placePopover()
@@ -178,11 +184,13 @@ function MuyuWidget({ t }: MuyuProps): ReactNode {
   // Detach window listeners if the widget unmounts mid-drag (HMR safety).
   useEffect(() => () => {
     if (hoverTimer.current !== null) window.clearTimeout(hoverTimer.current)
+    for (const timer of timersRef.current) window.clearTimeout(timer)
+    timersRef.current.clear()
     const listeners = listenersRef.current
     if (listeners === null) return
     window.removeEventListener('pointermove', listeners.move)
     window.removeEventListener('pointerup', listeners.up)
-    window.removeEventListener('pointercancel', listeners.up)
+    window.removeEventListener('pointercancel', listeners.cancel)
   }, [])
 
   // Re-clamp the anchor when the window shrinks, so the fish never strands
@@ -234,10 +242,19 @@ function MuyuWidget({ t }: MuyuProps): ReactNode {
   }
 
   /** Add a floating label that removes itself after its lifetime. */
+  const scheduleTimeout = (callback: () => void, delay: number): number => {
+    const timer = window.setTimeout(() => {
+      timersRef.current.delete(timer)
+      callback()
+    }, delay)
+    timersRef.current.add(timer)
+    return timer
+  }
+
   const pushFloater = (label: string, rainbow: boolean, ms: number = FLOATER_MS): void => {
     const id = ++floaterId.current
     setFloaters(current => [...current, { id, label, rainbow }])
-    window.setTimeout(() => {
+    scheduleTimeout(() => {
       setFloaters(current => current.filter(floater => floater.id !== id))
     }, ms)
   }
@@ -246,7 +263,7 @@ function MuyuWidget({ t }: MuyuProps): ReactNode {
   const pushBubble = (text: string): void => {
     const id = ++bubbleId.current
     setBubbles(current => [...current, { id, text }])
-    window.setTimeout(() => {
+    scheduleTimeout(() => {
       setBubbles(current => current.filter(bubble => bubble.id !== id))
     }, BUBBLE_MS)
   }
@@ -283,7 +300,7 @@ function MuyuWidget({ t }: MuyuProps): ReactNode {
       // is always in range — no silent fallback.
       pushBubble(t(BUBBLE_KEYS[pickFastStrikeMessage(Math.random, BUBBLE_KEYS.length)]))
     }
-    window.setTimeout(() => { setStriking(false) }, SWING_MS)
+    scheduleTimeout(() => { setStriking(false) }, SWING_MS)
   }
 
   // Celebrate the false→true rainbow transition exactly once per activation.
@@ -297,6 +314,7 @@ function MuyuWidget({ t }: MuyuProps): ReactNode {
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>): void => {
     if (event.button !== 0 || dragRef.current !== null) return
     dragRef.current = {
+      pointerId: event.pointerId,
       startX: event.clientX,
       startY: event.clientY,
       originX: state.x,
@@ -309,6 +327,7 @@ function MuyuWidget({ t }: MuyuProps): ReactNode {
       // before it clears, so a null session is unreachable — defensive only.
       /* v8 ignore next 2 -- unreachable: listener lifetime mirrors the session */
       if (session === null) return
+      if (moveEvent.pointerId !== session.pointerId) return
       const dx = moveEvent.clientX - session.startX
       const dy = moveEvent.clientY - session.startY
       if (!session.moved && Math.abs(dx) + Math.abs(dy) < DRAG_THRESHOLD_PX) return
@@ -317,24 +336,27 @@ function MuyuWidget({ t }: MuyuProps): ReactNode {
       const clamped = clampPosition(session.originX + dx, session.originY + dy, viewport())
       setState(prev => ({ ...prev, x: clamped.x, y: clamped.y }))
     }
-    const up = (): void => {
+    const finish = (cancelled: boolean, pointerId: number): void => {
+      const session = dragRef.current
+      if (session === null || session.pointerId !== pointerId) return
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerup', up)
-      window.removeEventListener('pointercancel', up)
+      window.removeEventListener('pointercancel', cancel)
       listenersRef.current = null
-      const session = dragRef.current
       dragRef.current = null
-      if (session !== null && !session.moved) strike()
+      if (!cancelled && session !== null && !session.moved) strike()
       setDragging(false)
     }
-    listenersRef.current = { move, up }
+    const up = (upEvent: PointerEvent): void => { finish(false, upEvent.pointerId) }
+    const cancel = (cancelEvent: PointerEvent): void => { finish(true, cancelEvent.pointerId) }
+    listenersRef.current = { move, up, cancel }
     window.addEventListener('pointermove', move)
     window.addEventListener('pointerup', up)
-    window.addEventListener('pointercancel', up)
+    window.addEventListener('pointercancel', cancel)
   }
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>): void => {
-    if (event.key !== 'Enter' && event.key !== ' ') return
+    if (event.repeat || (event.key !== 'Enter' && event.key !== ' ')) return
     event.preventDefault()
     strike()
   }
@@ -364,7 +386,7 @@ function MuyuWidget({ t }: MuyuProps): ReactNode {
 
   return (
     <div
-      className={clsx(css.root, hovered && css.hovered, dragging && css.dragging)}
+      className={clsx(css.root, dragging && css.dragging)}
       style={{ left: state.x, top: state.y }}
       onMouseEnter={enterHover}
       onMouseLeave={leaveHover}

@@ -176,7 +176,6 @@
   transform-origin: 65% 95%;
   opacity: 1;
   pointer-events: none;
-  transition: opacity 140ms ease;
 }
 
 .struck .mallet {

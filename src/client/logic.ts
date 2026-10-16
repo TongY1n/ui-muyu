@@ -204,7 +204,9 @@ export function loadState(
   return {
     x,
     y,
-    count: typeof parsed.count === 'number' && parsed.count >= 0 ? Math.floor(parsed.count) : 0,
+    count: typeof parsed.count === 'number' && Number.isFinite(parsed.count) && parsed.count >= 0
+      ? Math.floor(parsed.count)
+      : 0,
     color: typeof parsed.color === 'string' && /^#[0-9a-f]{6}$/i.test(parsed.color) ? parsed.color : DEFAULT_COLOR,
     rainbow: parsed.rainbow === true,
   }
