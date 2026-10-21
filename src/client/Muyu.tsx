@@ -350,11 +350,11 @@ function MuyuWidget({ t }: MuyuProps): ReactNode {
   }, [state.rainbow])
 
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>): void => {
-    if (event.button !== 0 || dragRef.current !== null) return
     // Pointer events are the reliable boundary signal in the Shadow Root.
     // Restore the retained interval before processing a click that brought
     // the pointer back to the fish.
     setFishHovered(true)
+    if (event.button !== 0 || dragRef.current !== null) return
     dragRef.current = {
       pointerId: event.pointerId,
       startX: event.clientX,
