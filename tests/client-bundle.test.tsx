@@ -109,7 +109,7 @@ test('striking, recoloring and resetting work across the shadow event boundary',
 
 test('rapid strikes show a complaint bubble', () => {
   vi.spyOn(Math, 'random').mockReturnValue(0.5)
-  vi.spyOn(Date, 'now').mockReturnValueOnce(1_000).mockReturnValueOnce(1_040)
+  vi.spyOn(Date, 'now').mockReturnValueOnce(1_000).mockReturnValueOnce(1_080)
   const { ui } = mountBundle()
   const fish = ui.getByRole('button', { name: 'fish.aria' })
   fireEvent.keyDown(fish, { key: 'Enter' })

@@ -199,7 +199,8 @@
 
 .floaters {
   position: absolute;
-  top: -14px;
+  /* Start the merit label slightly above the fish boundary. */
+  top: -18px;
   left: 50%;
   pointer-events: none;
   /* Merit floaters sit above the fish, mallet, and bubbles. */
