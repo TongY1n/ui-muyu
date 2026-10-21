@@ -145,6 +145,9 @@ function MuyuWidget({ t }: MuyuProps): ReactNode {
   const [speed, setSpeed] = useState<StrikeSpeed>({ currentMs: 0, bestMs: 0, active: false })
   const hoverTimer = useRef<number | null>(null)
   const speedIdleTimer = useRef<number | null>(null)
+  // Keep the run's fastest interval outside React scheduling so the idle
+  // callback can restore it even when several strikes arrive in one frame.
+  const bestStrikeMs = useRef(0)
   const [dragging, setDragging] = useState(false)
   const [striking, setStriking] = useState(false)
   const [floaters, setFloaters] = useState<Floater[]>([])
@@ -297,18 +300,20 @@ function MuyuWidget({ t }: MuyuProps): ReactNode {
     const fast = previousStrikeAt !== null && now - previousStrikeAt < FAST_STRIKE_MS
     lastStrikeAt.current = now
     const intervalMs = previousStrikeAt === null ? 0 : Math.max(1, now - previousStrikeAt)
+    if (previousStrikeAt === null) bestStrikeMs.current = 0
+    if (intervalMs > 0 && (bestStrikeMs.current === 0 || intervalMs < bestStrikeMs.current)) {
+      bestStrikeMs.current = intervalMs
+    }
     if (speedIdleTimer.current !== null) window.clearTimeout(speedIdleTimer.current)
     setSpeed(prev => ({
       currentMs: intervalMs,
-      bestMs: prev.active && prev.bestMs > 0
-        ? Math.min(prev.bestMs, intervalMs)
-        : intervalMs,
+      bestMs: bestStrikeMs.current,
       active: true,
     }))
     speedIdleTimer.current = window.setTimeout(() => {
       speedIdleTimer.current = null
       lastStrikeAt.current = null
-      setSpeed(prev => ({ ...prev, currentMs: 0, active: false }))
+      setSpeed(prev => ({ ...prev, currentMs: 0, bestMs: bestStrikeMs.current, active: false }))
     }, SPEED_IDLE_MS)
     const gain = rollGain(Math.random)
     const shift = rollColorShift(Math.random)

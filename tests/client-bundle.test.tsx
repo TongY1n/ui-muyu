@@ -135,6 +135,23 @@ test('strike interval is live while tapping and keeps the best interval after id
   expect(ui.getByText('80ms')).toBeTruthy()
 })
 
+test('strike interval keeps the fastest interval across a full tapping run after idle', () => {
+  vi.useFakeTimers()
+  const { ui } = mountBundle()
+  const fish = ui.getByRole('button', { name: 'fish.aria' })
+  vi.setSystemTime(1_000)
+  fireEvent.keyDown(fish, { key: 'Enter' })
+  vi.setSystemTime(1_120)
+  fireEvent.keyDown(fish, { key: 'Enter' })
+  vi.setSystemTime(1_200)
+  fireEvent.keyDown(fish, { key: 'Enter' })
+  vi.setSystemTime(1_300)
+  fireEvent.keyDown(fish, { key: 'Enter' })
+  expect(ui.getByText('100ms')).toBeTruthy()
+  act(() => { vi.advanceTimersByTime(500) })
+  expect(ui.getByText('80ms')).toBeTruthy()
+})
+
 test('pointer dragging across the boundary moves the widget without striking and persists it', () => {
   const { ui, unmount } = mountBundle()
   const fish = ui.getByRole('button', { name: 'fish.aria' })
