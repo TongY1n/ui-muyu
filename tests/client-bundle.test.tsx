@@ -152,6 +152,21 @@ test('strike interval keeps the fastest interval across a full tapping run after
   expect(ui.getByText('80ms')).toBeTruthy()
 })
 
+test('returning to the fish restores the retained interval before the next strike', () => {
+  vi.useFakeTimers()
+  vi.setSystemTime(1_000)
+  const { ui } = mountBundle()
+  const fish = ui.getByRole('button', { name: 'fish.aria' })
+  fireEvent.keyDown(fish, { key: 'Enter' })
+  vi.advanceTimersByTime(80)
+  fireEvent.keyDown(fish, { key: 'Enter' })
+  act(() => { vi.advanceTimersByTime(500) })
+  fireEvent.mouseOut(fish)
+  expect(ui.queryByText('80ms')).toBeNull()
+  fireEvent.pointerOver(fish, { pointerId: 1 })
+  expect(ui.getByText('80ms')).toBeTruthy()
+})
+
 test('pointer dragging across the boundary moves the widget without striking and persists it', () => {
   const { ui, unmount } = mountBundle()
   const fish = ui.getByRole('button', { name: 'fish.aria' })
