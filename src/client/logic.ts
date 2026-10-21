@@ -36,12 +36,8 @@ export const RAINBOW_GUARANTEE_COUNT = 100_000
 /** Per-strike crit odds: a crit adds 2..9 merit instead of 1. */
 export const CRIT_ODDS = 0.05
 
-/**
- * Minimum strike interval in ms; below this the widget complains.
- * 200ms is intentional: it restores the fast-strike feedback for ordinary
- * human pointer/keyboard taps after the old 100ms window became too narrow.
- */
-export const FAST_STRIKE_MS = 200
+/** Minimum strike interval in ms; below this the widget complains. */
+export const FAST_STRIKE_MS = 50
 
 /** Fast-strike bubble lifetime in ms. */
 export const BUBBLE_MS = 5_000
