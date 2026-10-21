@@ -30,7 +30,7 @@ export declare const RAINBOW_GUARANTEE_COUNT = 100000;
 /** Per-strike crit odds: a crit adds 2..9 merit instead of 1. */
 export declare const CRIT_ODDS = 0.05;
 /** Minimum strike interval in ms; below this the widget complains. */
-export declare const FAST_STRIKE_MS = 88;
+export declare const FAST_STRIKE_MS = 150;
 /** Fast-strike bubble lifetime in ms. */
 export declare const BUBBLE_MS = 5000;
 /** Per-strike probability of a surprise color shift. */

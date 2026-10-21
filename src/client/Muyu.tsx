@@ -130,8 +130,8 @@ function MalletIcon({ color, rainbow }: { color: string; rainbow: boolean }): Re
  * window; a press that never moves beyond the threshold counts as a strike.
  * Strikes gain 1 merit (or a 5%-odds crit of 2..9), float a gold "+N", swing
  * the mallet, roll the rainbow easter egg (guaranteed past 100,000 cumulative
- * strikes), and — when they arrive faster than FAST_STRIKE_MS apart — pop a
- * random complaint bubble at the fish's top-right corner. Position, count,
+ * strikes), and — when their interval is below FAST_STRIKE_MS — pop a random
+ * complaint bubble at the fish's top-right corner. Position, count,
  * color, and rainbow mode persist through localStorage.
  * @param props - the locale seat.
  * @returns the floating widget.
@@ -298,7 +298,7 @@ function MuyuWidget({ t }: MuyuProps): ReactNode {
   const strike = (): void => {
     const now = Date.now()
     const previousStrikeAt = lastStrikeAt.current
-    const fast = previousStrikeAt !== null && now - previousStrikeAt < FAST_STRIKE_MS
+    const prompt = previousStrikeAt !== null && now - previousStrikeAt < FAST_STRIKE_MS
     lastStrikeAt.current = now
     const intervalMs = previousStrikeAt === null ? 0 : Math.max(1, now - previousStrikeAt)
     if (previousStrikeAt === null) runHasInterval.current = false
@@ -339,7 +339,7 @@ function MuyuWidget({ t }: MuyuProps): ReactNode {
     setStriking(true)
     pushFloater(gain > 1 ? t('strike.crit', { gain }) : t('strike.plus'), false)
     if (shift) pushFloater(t('color.shift'), false)
-    if (fast) {
+    if (prompt) {
       // The pool and its size come from the same derived list, so the index
       // is always in range — no silent fallback.
       pushBubble(t(BUBBLE_KEYS[pickFastStrikeMessage(Math.random, BUBBLE_KEYS.length)]))

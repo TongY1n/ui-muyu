@@ -37,7 +37,7 @@ export const RAINBOW_GUARANTEE_COUNT = 100_000
 export const CRIT_ODDS = 0.05
 
 /** Minimum strike interval in ms; below this the widget complains. */
-export const FAST_STRIKE_MS = 88
+export const FAST_STRIKE_MS = 150
 
 /** Fast-strike bubble lifetime in ms. */
 export const BUBBLE_MS = 5_000

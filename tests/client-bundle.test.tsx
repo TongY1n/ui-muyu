@@ -108,14 +108,27 @@ test('striking, recoloring and resetting work across the shadow event boundary',
   expect(settings.getAttribute('aria-expanded')).toBe('false')
 })
 
-test('rapid strikes show a complaint bubble', () => {
+test('strike intervals below 150ms show a complaint bubble', () => {
+  vi.useFakeTimers()
   vi.spyOn(Math, 'random').mockReturnValue(0.5)
-  vi.spyOn(Date, 'now').mockReturnValueOnce(1_000).mockReturnValueOnce(1_080)
   const { ui } = mountBundle()
   const fish = ui.getByRole('button', { name: 'fish.aria' })
+  vi.setSystemTime(1_000)
   fireEvent.keyDown(fish, { key: 'Enter' })
+  vi.setSystemTime(1_080)
   fireEvent.keyDown(fish, { key: 'Enter' })
   expect(ui.getByText('bubble.6')).toBeTruthy()
+})
+
+test('strike prompt stops at the 150ms boundary', () => {
+  vi.useFakeTimers()
+  const { ui } = mountBundle()
+  const fish = ui.getByRole('button', { name: 'fish.aria' })
+  vi.setSystemTime(1_000)
+  fireEvent.keyDown(fish, { key: 'Enter' })
+  vi.setSystemTime(1_150)
+  fireEvent.keyDown(fish, { key: 'Enter' })
+  expect(ui.queryByText('bubble.6')).toBeNull()
 })
 
 test('strike interval is live while tapping and keeps the best interval after idle', () => {
