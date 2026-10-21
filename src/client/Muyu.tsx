@@ -148,6 +148,7 @@ function MuyuWidget({ t }: MuyuProps): ReactNode {
   // Keep the run's fastest interval outside React scheduling so the idle
   // callback can restore it even when several strikes arrive in one frame.
   const bestStrikeMs = useRef(0)
+  const runHasInterval = useRef(false)
   const [dragging, setDragging] = useState(false)
   const [striking, setStriking] = useState(false)
   const [floaters, setFloaters] = useState<Floater[]>([])
@@ -300,9 +301,14 @@ function MuyuWidget({ t }: MuyuProps): ReactNode {
     const fast = previousStrikeAt !== null && now - previousStrikeAt < FAST_STRIKE_MS
     lastStrikeAt.current = now
     const intervalMs = previousStrikeAt === null ? 0 : Math.max(1, now - previousStrikeAt)
-    if (previousStrikeAt === null) bestStrikeMs.current = 0
-    if (intervalMs > 0 && (bestStrikeMs.current === 0 || intervalMs < bestStrikeMs.current)) {
-      bestStrikeMs.current = intervalMs
+    if (previousStrikeAt === null) runHasInterval.current = false
+    if (intervalMs > 0) {
+      if (!runHasInterval.current) {
+        bestStrikeMs.current = intervalMs
+        runHasInterval.current = true
+      } else if (intervalMs < bestStrikeMs.current) {
+        bestStrikeMs.current = intervalMs
+      }
     }
     if (speedIdleTimer.current !== null) window.clearTimeout(speedIdleTimer.current)
     setSpeed(prev => ({
@@ -425,7 +431,7 @@ function MuyuWidget({ t }: MuyuProps): ReactNode {
 
   // Merit text turns gold once strikes have landed.
   const golden = state.count > 0
-  const displayedSpeedMs = speed.active ? speed.currentMs : speed.bestMs
+  const displayedSpeedMs = speed.active && speed.currentMs > 0 ? speed.currentMs : speed.bestMs
 
   return (
     <div
