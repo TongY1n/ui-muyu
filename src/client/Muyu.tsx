@@ -49,6 +49,13 @@ interface Bubble {
   text: string
 }
 
+/** Strike-rate display for the current tapping run. */
+interface StrikeSpeed {
+  current: number
+  peak: number
+  active: boolean
+}
+
 /** An in-flight drag session (null when idle). */
 interface DragSession {
   pointerId: number
@@ -65,6 +72,8 @@ const DRAG_THRESHOLD_PX = 4
 const SWING_MS = 240
 /** Floating label lifetime. */
 const FLOATER_MS = 700
+/** Inactivity window after which the current speed becomes the peak speed. */
+const SPEED_IDLE_MS = 500
 /** How long the hover reveal lingers after the pointer leaves, so the pointer
     can reach the settings button (which sits beyond the root's edge). */
 const HOVER_LEAVE_MS = 1_000
@@ -130,7 +139,12 @@ function MalletIcon({ color, rainbow }: { color: string; rainbow: boolean }): Re
 function MuyuWidget({ t }: MuyuProps): ReactNode {
   const [state, setState] = useState<MuyuState>(() => loadState(safeStorage(), viewport()))
   const [hovered, setHovered] = useState(false)
+  // Start visible so keyboard users and a pointer already over the fish can
+  // see the speed as soon as the first tapping run produces a value.
+  const [fishHovered, setFishHovered] = useState(true)
+  const [speed, setSpeed] = useState<StrikeSpeed>({ current: 0, peak: 0, active: false })
   const hoverTimer = useRef<number | null>(null)
+  const speedIdleTimer = useRef<number | null>(null)
   const [dragging, setDragging] = useState(false)
   const [striking, setStriking] = useState(false)
   const [floaters, setFloaters] = useState<Floater[]>([])
@@ -184,6 +198,7 @@ function MuyuWidget({ t }: MuyuProps): ReactNode {
   // Detach window listeners if the widget unmounts mid-drag (HMR safety).
   useEffect(() => () => {
     if (hoverTimer.current !== null) window.clearTimeout(hoverTimer.current)
+    if (speedIdleTimer.current !== null) window.clearTimeout(speedIdleTimer.current)
     for (const timer of timersRef.current) window.clearTimeout(timer)
     timersRef.current.clear()
     const listeners = listenersRef.current
@@ -268,6 +283,9 @@ function MuyuWidget({ t }: MuyuProps): ReactNode {
     }, BUBBLE_MS)
   }
 
+  const enterFish = (): void => { setFishHovered(true) }
+  const leaveFish = (): void => { setFishHovered(false) }
+
   /**
    * One strike: gain merit (1, or a crit of 2..9 at the stated odds), swing
    * the mallet, float the gain in gold, roll the rainbow, and complain when
@@ -275,8 +293,22 @@ function MuyuWidget({ t }: MuyuProps): ReactNode {
    */
   const strike = (): void => {
     const now = Date.now()
-    const fast = lastStrikeAt.current !== null && now - lastStrikeAt.current < FAST_STRIKE_MS
+    const previousStrikeAt = lastStrikeAt.current
+    const fast = previousStrikeAt !== null && now - previousStrikeAt < FAST_STRIKE_MS
     lastStrikeAt.current = now
+    const interval = previousStrikeAt === null ? 0 : now - previousStrikeAt
+    const strikeSpeed = interval > 0 ? Math.round((1_000 / interval) * 10) / 10 : 0
+    if (speedIdleTimer.current !== null) window.clearTimeout(speedIdleTimer.current)
+    setSpeed(prev => ({
+      current: strikeSpeed,
+      peak: prev.active ? Math.max(prev.peak, strikeSpeed) : strikeSpeed,
+      active: true,
+    }))
+    speedIdleTimer.current = window.setTimeout(() => {
+      speedIdleTimer.current = null
+      lastStrikeAt.current = null
+      setSpeed(prev => ({ ...prev, current: 0, active: false }))
+    }, SPEED_IDLE_MS)
     const gain = rollGain(Math.random)
     const shift = rollColorShift(Math.random)
     const shiftColor = shift ? randomColor(Math.random) : null
@@ -383,6 +415,8 @@ function MuyuWidget({ t }: MuyuProps): ReactNode {
 
   // Merit text turns gold once strikes have landed.
   const golden = state.count > 0
+  const displayedSpeed = speed.active ? speed.current : speed.peak
+  const speedLabel = speed.active ? 'speed.current' : 'speed.max'
 
   return (
     <div
@@ -400,11 +434,16 @@ function MuyuWidget({ t }: MuyuProps): ReactNode {
           style={fishStyle}
           onPointerDown={onPointerDown}
           onKeyDown={onKeyDown}
+          onMouseEnter={enterFish}
+          onMouseLeave={leaveFish}
         >
           <span className={css.eye} />
           <span className={css.slot} />
         </div>
         <MalletIcon color={state.color} rainbow={state.rainbow} />
+        {fishHovered && displayedSpeed > 0
+          ? <span className={css.speed} aria-live="polite">{t(speedLabel, { speed: displayedSpeed })}</span>
+          : null}
         <span className={css.floaters}>
           {floaters.map(floater => (
             <span key={floater.id} className={clsx(css.floater, floater.rainbow && css.floaterRainbow)}>

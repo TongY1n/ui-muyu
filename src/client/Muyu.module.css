@@ -197,6 +197,24 @@
   100% { transform: translateX(-50%) rotate(30deg); }
 }
 
+/* Strike speed sits just outside the fish's upper-right corner. */
+.speed {
+  position: absolute;
+  top: -4px;
+  left: calc(100% + 6px);
+  z-index: 4;
+  padding: 3px 6px;
+  border: 1px solid var(--muyu-border);
+  border-radius: 8px;
+  background: var(--muyu-surface);
+  box-shadow: var(--muyu-shadow-soft);
+  color: var(--muyu-text-strong);
+  font-size: 11px;
+  line-height: 14px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 .floaters {
   position: absolute;
   /* Start the merit label slightly above the fish boundary. */

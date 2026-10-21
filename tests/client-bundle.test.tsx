@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { resolve } from 'node:path'
 import React, { StrictMode, type ComponentType } from 'react'
-import { cleanup, fireEvent, render, within } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, within } from '@testing-library/react'
 import { afterEach, expect, test, vi } from 'vitest'
 
 const require = createRequire(import.meta.url)
@@ -54,6 +54,7 @@ afterEach(() => {
   cleanup()
   localStorage.clear()
   vi.restoreAllMocks()
+  vi.useRealTimers()
   document.head.querySelectorAll('style').forEach(style => style.remove())
 })
 
@@ -115,6 +116,23 @@ test('rapid strikes show a complaint bubble', () => {
   fireEvent.keyDown(fish, { key: 'Enter' })
   fireEvent.keyDown(fish, { key: 'Enter' })
   expect(ui.getByText('bubble.6')).toBeTruthy()
+})
+
+test('strike speed is live while tapping and keeps the peak while hovering', () => {
+  vi.useFakeTimers()
+  vi.setSystemTime(1_000)
+  const { ui } = mountBundle()
+  const fish = ui.getByRole('button', { name: 'fish.aria' })
+  fireEvent.keyDown(fish, { key: 'Enter' })
+  vi.advanceTimersByTime(80)
+  fireEvent.keyDown(fish, { key: 'Enter' })
+  expect(ui.getByText('speed.current')).toBeTruthy()
+  act(() => { vi.advanceTimersByTime(500) })
+  expect(ui.getByText('speed.max')).toBeTruthy()
+  fireEvent.mouseOut(fish)
+  expect(ui.queryByText('speed.max')).toBeNull()
+  fireEvent.mouseOver(fish)
+  expect(ui.getByText('speed.max')).toBeTruthy()
 })
 
 test('pointer dragging across the boundary moves the widget without striking and persists it', () => {
