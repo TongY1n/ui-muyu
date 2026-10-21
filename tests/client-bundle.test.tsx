@@ -118,7 +118,7 @@ test('rapid strikes show a complaint bubble', () => {
   expect(ui.getByText('bubble.6')).toBeTruthy()
 })
 
-test('strike speed is live while tapping and keeps the peak while hovering', () => {
+test('strike interval is live while tapping and keeps the best interval after idle', () => {
   vi.useFakeTimers()
   vi.setSystemTime(1_000)
   const { ui } = mountBundle()
@@ -126,13 +126,13 @@ test('strike speed is live while tapping and keeps the peak while hovering', () 
   fireEvent.keyDown(fish, { key: 'Enter' })
   vi.advanceTimersByTime(80)
   fireEvent.keyDown(fish, { key: 'Enter' })
-  expect(ui.getByText('speed.current')).toBeTruthy()
+  expect(ui.getByText('80ms')).toBeTruthy()
   act(() => { vi.advanceTimersByTime(500) })
-  expect(ui.getByText('speed.max')).toBeTruthy()
+  expect(ui.getByText('80ms')).toBeTruthy()
   fireEvent.mouseOut(fish)
-  expect(ui.queryByText('speed.max')).toBeNull()
+  expect(ui.queryByText('80ms')).toBeNull()
   fireEvent.mouseOver(fish)
-  expect(ui.getByText('speed.max')).toBeTruthy()
+  expect(ui.getByText('80ms')).toBeTruthy()
 })
 
 test('pointer dragging across the boundary moves the widget without striking and persists it', () => {

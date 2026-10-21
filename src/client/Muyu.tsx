@@ -49,10 +49,10 @@ interface Bubble {
   text: string
 }
 
-/** Strike-rate display for the current tapping run. */
+/** Strike-interval display for the current tapping run. */
 interface StrikeSpeed {
-  current: number
-  peak: number
+  currentMs: number
+  bestMs: number
   active: boolean
 }
 
@@ -72,7 +72,7 @@ const DRAG_THRESHOLD_PX = 4
 const SWING_MS = 240
 /** Floating label lifetime. */
 const FLOATER_MS = 700
-/** Inactivity window after which the current speed becomes the peak speed. */
+/** Inactivity window after which the current interval is retained as the run best. */
 const SPEED_IDLE_MS = 500
 /** How long the hover reveal lingers after the pointer leaves, so the pointer
     can reach the settings button (which sits beyond the root's edge). */
@@ -142,7 +142,7 @@ function MuyuWidget({ t }: MuyuProps): ReactNode {
   // Start visible so keyboard users and a pointer already over the fish can
   // see the speed as soon as the first tapping run produces a value.
   const [fishHovered, setFishHovered] = useState(true)
-  const [speed, setSpeed] = useState<StrikeSpeed>({ current: 0, peak: 0, active: false })
+  const [speed, setSpeed] = useState<StrikeSpeed>({ currentMs: 0, bestMs: 0, active: false })
   const hoverTimer = useRef<number | null>(null)
   const speedIdleTimer = useRef<number | null>(null)
   const [dragging, setDragging] = useState(false)
@@ -296,18 +296,19 @@ function MuyuWidget({ t }: MuyuProps): ReactNode {
     const previousStrikeAt = lastStrikeAt.current
     const fast = previousStrikeAt !== null && now - previousStrikeAt < FAST_STRIKE_MS
     lastStrikeAt.current = now
-    const interval = previousStrikeAt === null ? 0 : now - previousStrikeAt
-    const strikeSpeed = interval > 0 ? Math.round((1_000 / interval) * 10) / 10 : 0
+    const intervalMs = previousStrikeAt === null ? 0 : Math.max(1, now - previousStrikeAt)
     if (speedIdleTimer.current !== null) window.clearTimeout(speedIdleTimer.current)
     setSpeed(prev => ({
-      current: strikeSpeed,
-      peak: prev.active ? Math.max(prev.peak, strikeSpeed) : strikeSpeed,
+      currentMs: intervalMs,
+      bestMs: prev.active && prev.bestMs > 0
+        ? Math.min(prev.bestMs, intervalMs)
+        : intervalMs,
       active: true,
     }))
     speedIdleTimer.current = window.setTimeout(() => {
       speedIdleTimer.current = null
       lastStrikeAt.current = null
-      setSpeed(prev => ({ ...prev, current: 0, active: false }))
+      setSpeed(prev => ({ ...prev, currentMs: 0, active: false }))
     }, SPEED_IDLE_MS)
     const gain = rollGain(Math.random)
     const shift = rollColorShift(Math.random)
@@ -415,8 +416,7 @@ function MuyuWidget({ t }: MuyuProps): ReactNode {
 
   // Merit text turns gold once strikes have landed.
   const golden = state.count > 0
-  const displayedSpeed = speed.active ? speed.current : speed.peak
-  const speedLabel = speed.active ? 'speed.current' : 'speed.max'
+  const displayedSpeedMs = speed.active ? speed.currentMs : speed.bestMs
 
   return (
     <div
@@ -441,8 +441,8 @@ function MuyuWidget({ t }: MuyuProps): ReactNode {
           <span className={css.slot} />
         </div>
         <MalletIcon color={state.color} rainbow={state.rainbow} />
-        {fishHovered && displayedSpeed > 0
-          ? <span className={css.speed} aria-live="polite">{t(speedLabel, { speed: displayedSpeed })}</span>
+        {fishHovered && displayedSpeedMs > 0
+          ? <span className={css.speed} aria-live="polite">{displayedSpeedMs}ms</span>
           : null}
         <span className={css.floaters}>
           {floaters.map(floater => (

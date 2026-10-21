@@ -13,8 +13,6 @@ export declare const zh: {
     readonly 'color.shift': "变色！";
     readonly 'strike.plus': "+1";
     readonly 'strike.crit': "+{gain} 暴击！";
-    readonly 'speed.current': "当前 {speed} 次/秒";
-    readonly 'speed.max': "最高 {speed} 次/秒";
     readonly fortune: "+{gain} 暴富！";
     readonly 'bubble.0': "慢一点嘛，木鱼都要冒烟啦~";
     readonly 'bubble.1': "这么快，功德没跟上呢_(´ཀ`」 ∠)_";
@@ -33,4 +31,4 @@ export declare const zh: {
 export declare const en: Record<MuyuKey, string>;
 /** Key domain of the `muyu` namespace (zh is the source of truth). */
 export type MuyuKey = keyof typeof zh;
-export declare const BUBBLE_KEYS: ("fish.aria" | "count" | "settings.title" | "color.custom" | "color.random" | "reset" | "rainbow.burst" | "color.shift" | "strike.plus" | "strike.crit" | "speed.current" | "speed.max" | "fortune" | "bubble.0" | "bubble.1" | "bubble.2" | "bubble.3" | "bubble.4" | "bubble.5" | "bubble.6" | "bubble.7" | "bubble.8" | "bubble.9" | "bubble.10" | "bubble.11")[];
+export declare const BUBBLE_KEYS: ("fish.aria" | "count" | "settings.title" | "color.custom" | "color.random" | "reset" | "rainbow.burst" | "color.shift" | "strike.plus" | "strike.crit" | "fortune" | "bubble.0" | "bubble.1" | "bubble.2" | "bubble.3" | "bubble.4" | "bubble.5" | "bubble.6" | "bubble.7" | "bubble.8" | "bubble.9" | "bubble.10" | "bubble.11")[];
