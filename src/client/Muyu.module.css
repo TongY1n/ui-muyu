@@ -37,6 +37,9 @@
   --muyu-fish-radius: 46% 54% 54% 46% / 52% 50% 50% 48%;
   --muyu-rainbow-conic: conic-gradient(#f00, #ff8000, #ff0, #0f0, #0af, #80f, #f0f, #f00);
   --muyu-rainbow-linear: linear-gradient(90deg, #f00, #ff8000, #ff0, #0f0, #0af, #80f, #f0f);
+  /* Keep the rainbow movement calm enough to read the fish shape and mallet. */
+  --muyu-rainbow-hue-duration: 6s;
+  --muyu-rainbow-glow-duration: 2.8s;
   --muyu-face: rgba(30, 18, 8, 0.85);
   --muyu-slot: rgba(30, 18, 8, 0.5);
   --muyu-slot-highlight: rgba(255, 255, 255, 0.28);
@@ -146,7 +149,7 @@
   /* Do not inherit the wooden fish's inset shadow in the rainbow state. The
      main rainbow effect uses only its animated multi-color glow. */
   box-shadow: var(--muyu-glow-from);
-  animation: rainbowHue 2.4s linear infinite, rainbowGlow 1.1s ease-in-out infinite alternate;
+  animation: rainbowHue var(--muyu-rainbow-hue-duration) linear infinite, rainbowGlow var(--muyu-rainbow-glow-duration) ease-in-out infinite alternate;
 }
 
 /* Keep keyboard focus visible without adding an inner border. currentColor
@@ -184,11 +187,11 @@
 
 /* Rainbow mallet: the same hue-rotate flow as the fish, so it is not static. */
 .malletRainbow {
-  animation: rainbowHue 2.4s linear infinite;
+  animation: rainbowHue var(--muyu-rainbow-hue-duration) linear infinite;
 }
 
 .struck .malletRainbow {
-  animation: malletSwing 240ms ease, rainbowHue 2.4s linear infinite;
+  animation: malletSwing 240ms ease, rainbowHue var(--muyu-rainbow-hue-duration) linear infinite;
 }
 
 @keyframes malletSwing {

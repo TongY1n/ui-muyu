@@ -24,6 +24,8 @@ The fish first appears in the bottom-right corner of the window. If you don't se
 
 Temporarily close the covering panel, drag the fish somewhere unobstructed, then reopen the panel.
 
+If the fish is visible but does not respond, close any host onboarding dialog or transparent overlay first; it may still be capturing pointer events.
+
 If it vanishes after a drag-and-release, it may have been dropped behind something — time to hunt down your missing fish (´▽｀)
 
 ## Known Limitations and Deferred Work

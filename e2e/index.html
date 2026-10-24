@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>木鱼 E2E harness</title>
+  <style>
+    /* 宿主页「恶意样式」：若 Shadow DOM 隔离失效，木鱼会被染青并变成大方块。 */
+    button, [role="button"] {
+      background: cyan !important;
+      border-radius: 0 !important;
+      padding: 40px !important;
+    }
+    body { font-family: system-ui, sans-serif; background: #f6f6f8; margin: 24px; }
+  </style>
+</head>
+<body>
+  <h1>DSH 木鱼 harness（宿主页面）</h1>
+  <p>宿主样式把所有 button 强制染青放大：宿主按钮应变青（证明规则生效），影子树内的木鱼与按钮应不受影响（证明隔离）。</p>
+  <button id="host-button" type="button">宿主按钮（对照样本）</button>
+  <div id="root"></div>
+  <script type="module" src="./dist/harness.js"></script>
+</body>
+</html>

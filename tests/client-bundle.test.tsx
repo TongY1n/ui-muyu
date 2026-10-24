@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { resolve } from 'node:path'
 import React, { StrictMode, type ComponentType } from 'react'
-import { act, cleanup, fireEvent, render, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, within } from '@testing-library/react'
 import { afterEach, expect, test, vi } from 'vitest'
 
 const require = createRequire(import.meta.url)
@@ -74,6 +74,10 @@ test('the shipped bundle scopes all controls and CSS to a shadow root and cleans
   expect(widgetStyle).toContain('border:3px solid #0000')
   expect(widgetStyle).toContain('background-clip:border-box')
   expect(widgetStyle).toContain('box-shadow:var(--muyu-glow-from)')
+  expect(widgetStyle).toContain('--muyu-rainbow-hue-duration:6s')
+  expect(widgetStyle).toContain('--muyu-rainbow-glow-duration:2.8s')
+  expect(widgetStyle).toContain('rainbowHue var(--muyu-rainbow-hue-duration)')
+  expect(widgetStyle).toContain('rainbowGlow var(--muyu-rainbow-glow-duration)')
   expect(widgetStyle).toMatch(/rainbow:focus-visible\{[^}]*outline-offset:3px[^}]*outline:2px solid/)
   expect(widgetStyle).not.toContain('background-clip:padding-box')
   const fishClass = view.ui.getByRole('button', { name: 'fish.aria' }).className.split(' ')[0]
@@ -131,16 +135,15 @@ test('strike prompt stops at the 150ms boundary', () => {
   expect(ui.queryByText('bubble.6')).toBeNull()
 })
 
-test('strike interval is live while tapping and keeps the best interval after idle', () => {
+test('strike interval is live while tapping and ends at the fish boundary', () => {
   vi.useFakeTimers()
   vi.setSystemTime(1_000)
   const { ui } = mountBundle()
   const fish = ui.getByRole('button', { name: 'fish.aria' })
+  fireEvent.pointerOver(fish, { pointerId: 1 })
   fireEvent.keyDown(fish, { key: 'Enter' })
   vi.advanceTimersByTime(80)
   fireEvent.keyDown(fish, { key: 'Enter' })
-  expect(ui.getByText('80ms')).toBeTruthy()
-  act(() => { vi.advanceTimersByTime(500) })
   expect(ui.getByText('80ms')).toBeTruthy()
   fireEvent.mouseOut(fish)
   expect(ui.queryByText('80ms')).toBeNull()
@@ -148,10 +151,11 @@ test('strike interval is live while tapping and keeps the best interval after id
   expect(ui.getByText('80ms')).toBeTruthy()
 })
 
-test('strike interval keeps the fastest interval across a full tapping run after idle', () => {
+test('strike interval keeps the fastest interval across a full hover round', () => {
   vi.useFakeTimers()
   const { ui } = mountBundle()
   const fish = ui.getByRole('button', { name: 'fish.aria' })
+  fireEvent.pointerOver(fish, { pointerId: 1 })
   vi.setSystemTime(1_000)
   fireEvent.keyDown(fish, { key: 'Enter' })
   vi.setSystemTime(1_120)
@@ -161,7 +165,8 @@ test('strike interval keeps the fastest interval across a full tapping run after
   vi.setSystemTime(1_300)
   fireEvent.keyDown(fish, { key: 'Enter' })
   expect(ui.getByText('100ms')).toBeTruthy()
-  act(() => { vi.advanceTimersByTime(500) })
+  fireEvent.pointerOut(fish, { pointerId: 1 })
+  fireEvent.pointerOver(fish, { pointerId: 1 })
   expect(ui.getByText('80ms')).toBeTruthy()
 })
 
@@ -170,10 +175,10 @@ test('returning to the fish restores the retained interval before the next strik
   vi.setSystemTime(1_000)
   const { ui } = mountBundle()
   const fish = ui.getByRole('button', { name: 'fish.aria' })
+  fireEvent.pointerOver(fish, { pointerId: 1 })
   fireEvent.keyDown(fish, { key: 'Enter' })
   vi.advanceTimersByTime(80)
   fireEvent.keyDown(fish, { key: 'Enter' })
-  act(() => { vi.advanceTimersByTime(500) })
   fireEvent.mouseOut(fish)
   expect(ui.queryByText('80ms')).toBeNull()
   fireEvent.pointerOver(fish, { pointerId: 1 })
@@ -188,7 +193,6 @@ test('a return click does not erase the previously retained interval', () => {
   fireEvent.keyDown(fish, { key: 'Enter' })
   vi.advanceTimersByTime(80)
   fireEvent.keyDown(fish, { key: 'Enter' })
-  act(() => { vi.advanceTimersByTime(500) })
   fireEvent.mouseOut(fish)
   fireEvent.pointerOver(fish, { pointerId: 1 })
   expect(ui.getByText('80ms')).toBeTruthy()

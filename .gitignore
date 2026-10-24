@@ -7,3 +7,8 @@ coverage/
 .playwright-cli/
 
 .browser-harness.*
+
+# Local browser evidence and generated harness output.
+gui-test-screenshots/
+e2e/dist/
+.pnpm-store/
