@@ -4,8 +4,10 @@
 
 ## Branches and scope
 
-- Make changes on a development branch such as `codex/*` or `development`.
+- Make changes on a development branch without a `codex/` prefix, such as `feature-*`, `fix-*`, or `release-vX.Y.Z`.
 - Keep `main` release-ready. Do not develop directly on `main`.
+- Before starting each task, fetch the latest remote state, fast-forward local `main`, and create the new development branch from that `main` commit.
+- Keep development and validation local until the maintainer approves the result. Only then push the branch, open a PR, and request a merge.
 - Before merging, rebase or merge the current `main`, run the full checks, and leave the worktree clean.
 - Keep DSH compatibility changes, UI behavior changes, generated artifacts, and their documentation in the same reviewable change.
 
@@ -52,7 +54,7 @@ git diff --check
 
 ## Release process
 
-- Create a `codex/release-vX.Y.Z` branch from the latest green `main`; never bump versions, create tags, or publish directly from an unreviewed `main` change.
+- Create a `release-vX.Y.Z` branch from the latest green `main`; never bump versions, create tags, or publish directly from an unreviewed `main` change.
 - Run the full local gate before opening the release PR: `pnpm typecheck`, `pnpm test`, `pnpm pack:check`, `pnpm release:check`, and `git diff --check`.
 - Merge only after every PR check passes. If CI is red, stop the release and fix the cause through a new reviewed commit.
 - After merge, tag the exact `main` HEAD, create the GitHub Release from that tag, and upload the tarball built from the same commit.
