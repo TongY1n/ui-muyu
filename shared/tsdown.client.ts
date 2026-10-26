@@ -249,17 +249,24 @@ function clientConfig(id: string, entry: string): UserConfig {
       name: 'dsh-css-modules-inline',
       resolveId(source: string, importer: string | undefined) {
         if (!source.endsWith('.module.css')) return null
-        const abs = importer !== undefined ? sourceAssetPath(source, importer) : source
-        return CSS_VIRTUAL_PREFIX + abs + CSS_VIRTUAL_SUFFIX
+        const abs = importer !== undefined
+          ? sourceAssetPath(source, importer)
+          : resolvePath(REPOSITORY_ROOT, source)
+        // Keep the virtual module id stable across checkout locations. The id
+        // is emitted into the bundle's region markers and also feeds
+        // lightningcss's CSS Module hash, so using an absolute path would make
+        // committed lib/ artifacts differ between a developer machine and CI.
+        return CSS_VIRTUAL_PREFIX + repositoryRelativePath(abs) + CSS_VIRTUAL_SUFFIX
       },
       async load(virtualId: string) {
         if (!virtualId.startsWith(CSS_VIRTUAL_PREFIX)) return null
-        const fileId = virtualId.slice(CSS_VIRTUAL_PREFIX.length, -CSS_VIRTUAL_SUFFIX.length)
+        const relativeFile = virtualId.slice(CSS_VIRTUAL_PREFIX.length, -CSS_VIRTUAL_SUFFIX.length)
+        const fileId = resolvePath(REPOSITORY_ROOT, relativeFile)
         // The virtual id otherwise hides the physical stylesheet from Rolldown's watch graph.
         this.addWatchFile(fileId)
         const source = await readFile(fileId)
         const { code, exports: cssExports } = transform({
-          filename: fileId,
+          filename: relativeFile,
           code: source,
           cssModules: { pattern: '[hash]_[local]' },
           minify: true,
@@ -290,6 +297,15 @@ function clientConfig(id: string, entry: string): UserConfig {
       intro: 'var module = { exports: {} }; var exports = module.exports;',
     },
   }
+}
+
+/** Return a stable slash-separated path for generated module ids and hashes. */
+function repositoryRelativePath(filePath: string): string {
+  const repositoryPath = relative(REPOSITORY_ROOT, filePath).split(sep).join('/')
+  if (repositoryPath === '..' || repositoryPath.startsWith('../')) {
+    throw new Error(`CSS module must be inside the repository root: ${filePath}`)
+  }
+  return repositoryPath
 }
 
 /** Resolve an emitted JS asset import against its source-tree counterpart. */

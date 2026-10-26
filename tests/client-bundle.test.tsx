@@ -87,6 +87,12 @@ test('the shipped bundle scopes all controls and CSS to a shadow root and cleans
   expect(view.shadow.childNodes).toHaveLength(0)
 })
 
+test('the shipped bundle does not embed the checkout path in CSS module output', () => {
+  const cssPath = resolve(runtime.process?.cwd?.() ?? '.', 'src/client/Muyu.module.css')
+  expect(bundle).not.toContain(cssPath)
+  expect(bundle).toContain('src/client/Muyu.module.css.mjs')
+})
+
 test('striking, recoloring and resetting work across the shadow event boundary', () => {
   vi.spyOn(Math, 'random').mockReturnValue(0.5)
   const { ui, shadow } = mountBundle()
@@ -236,6 +242,7 @@ test('pointer cancellation and unrelated pointer ids do not strike the fish', ()
 })
 
 test('keyboard auto-repeat does not create another strike', () => {
+  vi.spyOn(Math, 'random').mockReturnValue(0.5)
   const { ui } = mountBundle()
   const fish = ui.getByRole('button', { name: 'fish.aria' })
   fireEvent.keyDown(fish, { key: 'Enter' })
