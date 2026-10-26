@@ -1,0 +1,55 @@
+name: Publish npm package
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      # 只从已发布 Release 对应的 tag 构建，保证 npm 包和 GitHub Release 同源。
+      - name: Check out release tag
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify package version
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="${{ github.event.release.tag_name }}"
+          version="$(node -p "require('./package.json').version")"
+          test "v${version}" = "${tag}"
+
+      - name: Build and test
+        run: pnpm test
+
+      - name: Check npm package contents
+        run: pnpm npm:check
+
+      - name: Check release metadata
+        run: pnpm release:check
+
+      # 通过 GitHub OIDC 获取 npm provenance，不在仓库保存长期 token。
+      - name: Publish package with npm provenance
+        run: npm publish --provenance --access public
