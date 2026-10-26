@@ -40,7 +40,7 @@ Shadow DOM 会将 document 层收到的 `event.target` 重定向为 Host。判�
 
 ## 验证与当前限制
 
-`pnpm test` 先构建，再从真实 `lib/client.js` 加载模块工厂和 slot 注册，检查：Shadow Root/样式生命周期、StrictMode 挂载、敲击、速度显示、换色、重置、外部点击、跨边界拖拽、持久化，以及弹层边缘定位。当前共有 13 项 Vitest 用例。测试使用 jsdom，不能代替真实浏览器的像素和主题验收。
+`pnpm test` 先构建，再从真实 `lib/client.js` 加载模块工厂和 slot 注册，检查：Shadow Root/样式生命周期、StrictMode 挂载、敲击、速度显示、换色、重置、外部点击、跨边界拖拽、持久化、弹层边缘定位，以及构建产物不嵌入 checkout 绝对路径。当前共有 14 项 Vitest 用例。测试使用 jsdom，不能代替真实浏览器的像素和主题验收。
 
 当前开发分支的 rc.3 适配已通过类型检查、构建、13 项交互测试、依赖元数据检查、pack dry-run 和 `git diff --check`。旧 main bundle 运行隔离测试会因缺少 Shadow Root 而失败，这是预期的基线差异；验收以当前分支构建产物为准。由于 pnpm 会尝试重建现有 node_modules，脚本验证使用 `pnpm_config_verify_deps_before_run=false` 保留当前依赖，未清空或重装工作区依赖。
 
@@ -55,6 +55,8 @@ Shadow DOM 会将 document 层收到的 `event.target` 重定向为 Host。判�
 发布前仍应在隔离配置目录中补做浅色/深色主题切换、插件卸载重载，以及带 `!important` 的宿主 button/div/span/svg 规则回归；悬停、键盘焦点、拖拽、窗口边缘、样式隔离、面板和敲击动作已在 rc.3 Web/Desktop 测试中验证。始终隔离 DSH 配置目录，不操作用户真实 `~/.dsh`。
 
 2026-10-25 已在官方 DSH `0.2.1-rc.3` Web 与 Desktop 渲染页面完成同样的隔离复核。Desktop 使用 `/tmp/dsh-muyu-desktop-rc3-20261025`，页面版本标识为 `0.2.1-rc.3-1f81c04`；鱼体 computed 尺寸为 `64×64`，圆角、阴影、木鱼锤和设置面板与本文件约定一致，宿主升级未改变插件内部视觉。
+
+2026-10-26 修复 CI 的生成产物检查：CSS Module 的虚拟模块 ID 和 Lightning CSS `filename` 改用仓库相对路径，绝对路径仅用于读取和监听源文件。不同 checkout 路径构建出的 `lib/client.js` 与 source map 已通过字节级比较；CSS Module 类名和 bundle region marker 不再随机器路径变化。
 
 ## 参考
 
