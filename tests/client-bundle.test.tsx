@@ -242,6 +242,7 @@ test('pointer cancellation and unrelated pointer ids do not strike the fish', ()
 })
 
 test('keyboard auto-repeat does not create another strike', () => {
+  vi.spyOn(Math, 'random').mockReturnValue(0.5)
   const { ui } = mountBundle()
   const fish = ui.getByRole('button', { name: 'fish.aria' })
   fireEvent.keyDown(fish, { key: 'Enter' })
