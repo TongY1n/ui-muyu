@@ -50,6 +50,17 @@ git diff --check
 - Update the dated handoff/test report when the supported DSH version or user-visible behavior changes.
 - Do not publish until the Web/Desktop verification status, theme behavior, uninstall/reload behavior, and hostile-host-style isolation checks are recorded.
 
+## Release process
+
+- Create a `codex/release-vX.Y.Z` branch from the latest green `main`; never bump versions, create tags, or publish directly from an unreviewed `main` change.
+- Run the full local gate before opening the release PR: `pnpm typecheck`, `pnpm test`, `pnpm pack:check`, `pnpm release:check`, and `git diff --check`.
+- Merge only after every PR check passes. If CI is red, stop the release and fix the cause through a new reviewed commit.
+- After merge, tag the exact `main` HEAD, create the GitHub Release from that tag, and upload the tarball built from the same commit.
+- Verify that the tag, `main`, Release asset, registry metadata, and tag-push CI all refer to the same version and commit.
+- A fix to bundle determinism or another published artifact requires an immediate patch release after it reaches `main`.
+
+The historical audit and rationale are recorded in [`docs/development/release-process-review-2026-10-27.md`](docs/development/release-process-review-2026-10-27.md).
+
 ## Test artifacts and documentation
 
 - Keep reproducible harness source under `e2e/` when it is useful to future maintainers.

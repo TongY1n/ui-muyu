@@ -46,6 +46,19 @@ git diff --check
 - `pnpm release:check` 是发布元数据的一致性检查，版本变更后必须通过。
 - 发布前不得继续复用旧版本 tarball 的 registry 地址。
 
+## 标准发版流程
+
+1. 从最新且 CI 通过的 `main` 创建 `codex/release-vX.Y.Z` 分支。禁止直接在 `main` 上改版本、打 tag 或发布。
+2. 同步更新 `package.json`、`registry/curated/plugin.json` 和 `CHANGELOG.md`。源码有变化时先运行构建并提交生成的 `lib/`。
+3. 在发布分支运行 `pnpm typecheck`、`pnpm test`、`pnpm pack:check`、`pnpm release:check` 和 `git diff --check`。涉及 DSH 适配或用户可见行为时，还要记录隔离 `DSH_HOME` 下的 Web/Desktop 验证结果。
+4. 推送发布分支并创建 PR。PR 的所有 CI 检查必须通过；任一检查失败时停止发布，修复后重新验证，禁止带红合入或发布。
+5. PR 合并后同步本地 `main`，确认工作区干净，并确认待发布提交就是 `main` 的最新提交。
+6. 只在该 `main` 提交上创建版本 tag，并推送 tag。GitHub Release 必须使用同一个 tag，上传从该提交生成的 tarball。
+7. 发布后核对 tag、`main`、Release 资产和 registry tarball 地址一致，并确认 tag push CI 通过。
+8. 构建确定性、发布产物或安装链路问题修复合入后，应立即发布下一个 patch 版本，不得让已知缺陷产物继续流通。
+
+发布说明只记录用户可理解的功能、兼容性、构建和验证信息，不公开内部彩蛋实现细节。
+
 ## 测试产物和文档
 
 - 可复用的 E2E harness 源码保存在 `e2e/`；其生成目录 `e2e/dist/` 忽略。
