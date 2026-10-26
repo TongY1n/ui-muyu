@@ -4,14 +4,15 @@
 
 ## 分支与提交
 
-- 所有开发在无 `codex/` 前缀的开发分支进行，例如 `feature-...`、`fix-...` 或 `release-vX.Y.Z`；`main` 只保留可发布内容。
+- 所有开发在带类别前缀的开发分支进行，例如 `feat/muyu-dsh-020-adaptation`、`fix/deterministic-client-bundle`、`refactor/<topic>` 或 `docs/<topic>`；`main` 只保留可发布内容。
+- 发版分支使用 `release/vX.Y.Z`；分支名不使用 `codex/` 前缀。
 - 开始每项新开发前，必须先获取远端最新状态，将本地 `main` 快进到 `origin/main`，再从该提交创建新的开发分支：
 
   ```sh
   git fetch origin --prune
   git switch main
   git pull --ff-only
-  git switch -c <branch-name>
+  git switch -c <type>/<short-description>
   ```
 
 - DSH 适配、用户可见行为、生成产物和对应文档应在同一组可审查的改动中维护。
@@ -58,7 +59,7 @@ git diff --check
 
 ## 标准发版流程
 
-1. 从最新且 CI 通过的 `main` 创建 `release-vX.Y.Z` 分支。禁止直接在 `main` 上改版本、打 tag 或发布。
+1. 从最新且 CI 通过的 `main` 创建 `release/vX.Y.Z` 分支。禁止直接在 `main` 上改版本、打 tag 或发布。
 2. 同步更新 `package.json`、`registry/curated/plugin.json` 和 `CHANGELOG.md`。源码有变化时先运行构建并提交生成的 `lib/`。
 3. 在发布分支运行 `pnpm typecheck`、`pnpm test`、`pnpm pack:check`、`pnpm release:check` 和 `git diff --check`。涉及 DSH 适配或用户可见行为时，还要记录隔离 `DSH_HOME` 下的 Web/Desktop 验证结果。
 4. 推送发布分支并创建 PR。PR 的所有 CI 检查必须通过；任一检查失败时停止发布，修复后重新验证，禁止带红合入或发布。

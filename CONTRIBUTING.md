@@ -4,7 +4,7 @@
 
 ## Branches and scope
 
-- Make changes on a development branch without a `codex/` prefix, such as `feature-*`, `fix-*`, or `release-vX.Y.Z`.
+- Make changes on a categorized development branch such as `feat/muyu-dsh-020-adaptation`, `fix/deterministic-client-bundle`, `refactor/<topic>`, or `docs/<topic>`.
 - Keep `main` release-ready. Do not develop directly on `main`.
 - Before starting each task, fetch the latest remote state, fast-forward local `main`, and create the new development branch from that `main` commit.
 - Keep development and validation local until the maintainer approves the result. Only then push the branch, open a PR, and request a merge.
@@ -54,7 +54,7 @@ git diff --check
 
 ## Release process
 
-- Create a `release-vX.Y.Z` branch from the latest green `main`; never bump versions, create tags, or publish directly from an unreviewed `main` change.
+- Create a `release/vX.Y.Z` branch from the latest green `main`; never bump versions, create tags, or publish directly from an unreviewed `main` change.
 - Run the full local gate before opening the release PR: `pnpm typecheck`, `pnpm test`, `pnpm pack:check`, `pnpm release:check`, and `git diff --check`.
 - Merge only after every PR check passes. If CI is red, stop the release and fix the cause through a new reviewed commit.
 - After merge, tag the exact `main` HEAD, create the GitHub Release from that tag, and upload the tarball built from the same commit.
