@@ -4,11 +4,11 @@
 
 ## Branches and scope
 
-- Make changes on a categorized development branch such as `feat/muyu-dsh-020-adaptation`, `fix/deterministic-client-bundle`, `refactor/<topic>`, or `docs/<topic>`.
+- Make changes on one categorized development branch such as `feat/muyu-dsh-020-adaptation`, `fix/deterministic-client-bundle`, `refactor/<topic>`, or `docs/<topic>`. Each development branch maps to one PR.
 - Keep `main` release-ready. Do not develop directly on `main`.
 - Before starting each task, fetch the latest remote state, fast-forward local `main`, and create the new development branch from that `main` commit.
 - Keep development and validation local until the maintainer approves the result. Only then push the branch, open a PR, and request a merge.
-- Before merging, rebase or merge the current `main`, run the full checks, and leave the worktree clean.
+- Before merging, rebase or merge the current `main`, run the full checks, and leave the worktree clean. Merge PRs one at a time; after each merge, wait for `main` CI to pass before merging the next PR.
 - Keep DSH compatibility changes, UI behavior changes, generated artifacts, and their documentation in the same reviewable change.
 
 ## Source and generated files
@@ -54,12 +54,13 @@ git diff --check
 
 ## Release process
 
-- Create a `release/vX.Y.Z` branch from the latest green `main`; never bump versions, create tags, or publish directly from an unreviewed `main` change.
+- Create a `release-vX.Y.Z` branch from the latest green `main` when the accumulated PRs are ready for a release; never bump versions, create tags, or publish directly from an unreviewed `main` change.
 - Run the full local gate before opening the release PR: `pnpm typecheck`, `pnpm test`, `pnpm pack:check`, `pnpm release:check`, and `git diff --check`.
 - Merge only after every PR check passes. If CI is red, stop the release and fix the cause through a new reviewed commit.
 - After merge, tag the exact `main` HEAD, create the GitHub Release from that tag, and upload the tarball built from the same commit.
 - Verify that the tag, `main`, Release asset, registry metadata, and tag-push CI all refer to the same version and commit.
-- A fix to bundle determinism or another published artifact requires an immediate patch release after it reaches `main`.
+- A fix to bundle determinism or another published artifact requires an immediate patch release after it reaches `main`; it does not wait for the next accumulated release.
+- The normal release timing is when the accumulated PRs form a coherent version, not whenever a merge happens.
 
 The historical audit and rationale are recorded in [`docs/development/release-process-review-2026-10-27.md`](docs/development/release-process-review-2026-10-27.md).
 

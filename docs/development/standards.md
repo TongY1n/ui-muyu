@@ -5,7 +5,7 @@
 ## 分支与提交
 
 - 所有开发在带类别前缀的开发分支进行，例如 `feat/muyu-dsh-020-adaptation`、`fix/deterministic-client-bundle`、`refactor/<topic>` 或 `docs/<topic>`；`main` 只保留可发布内容。
-- 发版分支使用 `release/vX.Y.Z`；分支名不使用 `codex/` 前缀。
+- 发版分支使用 `release-vX.Y.Z`；分支名不使用 `codex/` 前缀。
 - 开始每项新开发前，必须先获取远端最新状态，将本地 `main` 快进到 `origin/main`，再从该提交创建新的开发分支：
 
   ```sh
@@ -15,9 +15,9 @@
   git switch -c <type>/<short-description>
   ```
 
-- DSH 适配、用户可见行为、生成产物和对应文档应在同一组可审查的改动中维护。
+- DSH 适配、用户可见行为、生成产物和对应文档应在同一组可审查的改动中维护；每个开发分支只承载一个 PR 的完整改动。
 - 开发和验证阶段默认只保留在本地；完成本地验证并经维护者确认后，才推送远端、创建 PR 和请求合并。不得未经确认直接推送开发分支或合入 `main`。
-- 合并前确认当前分支包含最新 `main`，工作区无无意修改，并重新运行全部门禁。
+- 合并前确认当前分支包含最新 `main`，工作区无无意修改，并重新运行全部门禁。多个 PR 必须逐个合并；每合并一个 PR 后，必须等待 `main` CI 通过，再处理下一个 PR。
 
 ## 源码与产物
 
@@ -59,14 +59,15 @@ git diff --check
 
 ## 标准发版流程
 
-1. 从最新且 CI 通过的 `main` 创建 `release/vX.Y.Z` 分支。禁止直接在 `main` 上改版本、打 tag 或发布。
-2. 同步更新 `package.json`、`registry/curated/plugin.json` 和 `CHANGELOG.md`。源码有变化时先运行构建并提交生成的 `lib/`。
-3. 在发布分支运行 `pnpm typecheck`、`pnpm test`、`pnpm pack:check`、`pnpm release:check` 和 `git diff --check`。涉及 DSH 适配或用户可见行为时，还要记录隔离 `DSH_HOME` 下的 Web/Desktop 验证结果。
-4. 推送发布分支并创建 PR。PR 的所有 CI 检查必须通过；任一检查失败时停止发布，修复后重新验证，禁止带红合入或发布。
-5. PR 合并后同步本地 `main`，确认工作区干净，并确认待发布提交就是 `main` 的最新提交。
-6. 只在该 `main` 提交上创建版本 tag，并推送 tag。GitHub Release 必须使用同一个 tag，上传从该提交生成的 tarball。
-7. 发布后核对 tag、`main`、Release 资产和 registry tarball 地址一致，并确认 tag push CI 通过。
-8. 构建确定性、发布产物或安装链路问题修复合入后，应立即发布下一个 patch 版本，不得让已知缺陷产物继续流通。
+1. 每个 `feat/...`、`fix/...`、`refactor/...` 或 `docs/...` 分支只对应一个 PR，并从最新 `main` 创建。开发分支在本地完成实现、验证并经维护者确认后，才推送远端和创建 PR。
+2. 多个 PR 逐个合并，而不是打包合并。后续 PR 在合并前必须 rebase 或 merge 最新 `main`，并重新运行门禁。
+3. 每合并一个 PR，必须等待 `main` CI 通过后再继续下一个；CI 变红就停止合并，先修复并重新验证。
+4. 觉得已积累够一个版本时，从最新且 CI 通过的 `main` 创建 `release-vX.Y.Z` 分支。禁止直接在 `main` 上改版本、打 tag 或发布。
+5. 在发布分支同步更新 `package.json`、`registry/curated/plugin.json` 和 `CHANGELOG.md`。源码有变化时先运行构建并提交生成的 `lib/`。
+6. 在发布分支运行 `pnpm typecheck`、`pnpm test`、`pnpm pack:check`、`pnpm release:check` 和 `git diff --check`。涉及 DSH 适配或用户可见行为时，还要记录隔离 `DSH_HOME` 下的 Web/Desktop 验证结果。
+7. 发布 PR 的所有 CI 检查通过后合入；合并后同步本地 `main`，确认工作区干净，并确认待发布提交就是 `main` 的最新提交。
+8. 只在该 `main` 提交上创建版本 tag，并推送 tag。GitHub Release 必须使用同一个 tag，上传从该提交生成的 tarball；发布后核对 tag、`main`、Release 资产、registry 地址和 tag push CI。
+9. 构建确定性、发布产物或安装链路问题修复合入后，应立即发布下一个 patch 版本，不等待攒够其他改动；普通改动按版本节奏集中发布。
 
 发布说明只记录用户可理解的功能、兼容性、构建和验证信息，不公开内部彩蛋实现细节。
 
