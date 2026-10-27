@@ -4,4 +4,4 @@
 # package.json loads the browser half (exports "./client") in the web GUI.
 - insert:
     - id: ui-muyu
-      name: '@deepseek-ai/dsh-client-ui-muyu'
+      name: 'dsh-ui-muyu'

@@ -8,4 +8,4 @@
  */
 import { clientBundle } from './shared/tsdown.client.ts'
 
-export default clientBundle('@deepseek-ai/dsh-client-ui-muyu', ['src/index.ts'])
+export default clientBundle('dsh-ui-muyu', ['src/index.ts'])

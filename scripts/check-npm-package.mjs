@@ -40,7 +40,7 @@ function validatePackage(manifest, packed) {
   }
 
   if (manifest.publishConfig?.access !== 'public') {
-    throw new Error('publishConfig.access must be public for the scoped package.')
+    throw new Error('publishConfig.access must be public for the public package.')
   }
 
   // 验证 npm 包仍然声明 DSH Bundle 和 Web client，避免出现“能安装但不能加载”的包。
@@ -51,7 +51,7 @@ function validatePackage(manifest, packed) {
     throw new Error('dsh.client.platform must be web and exports["./client"] must exist.')
   }
 
-  // scoped 包的 npm tarball 文件名会把 scope 和包名都展开为连字符。
+  // npm tarball 文件名由包名和版本组成，兼容 scoped 与 unscoped 包名。
   const expectedFilename = `${manifest.name.replace(/^@/, '').replace('/', '-')}-${manifest.version}.tgz`
   if (packed.filename !== expectedFilename) {
     throw new Error(`npm pack filename must be ${expectedFilename}, got ${packed.filename}`)
