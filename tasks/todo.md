@@ -12,9 +12,9 @@
 
 ## Review
 
-- npm 前置条件：registry 查询 dsh-ui-muyu 返回 HTTP 404；本机 npm whoami 返回 401，尚无可用发布身份。
+- 初始 npm 检查曾返回包 404、身份 401；维护者随后完成登录及 2FA，正式包已发布，见下方 v0.1.5 Review。
 - npm workflow 仅由 Release published 事件触发；普通分支或 main 的 push/merge 不会发布 npm。
-- 首次发布账号、包归属和 npm Trusted Publishing 绑定仍待完成，不能将 workflow 存在视为已具备发布权限。
+- 首次发布账号为 tongy1n，Trusted Publisher 配置已创建；尚未完成首个 OIDC 实际发布，不将配置存在等同于自动发布链路已经验证。
 - 保留 GitHub Release 兼容下载入口；维护者已于 2026-11-01 明确确认人工验收通过，进入发布准备。
 - 彩蛋专项实测 22 项：21 项通过，1 项已知异常：暴富提示节点保留 88 秒，但公用 floatUp 动画约 700ms 后透明。已向维护者报告，维护者随后确认人工验收通过；本次不扩大 UI 修改范围，公开更新日志不披露彩蛋信息。
 
@@ -47,20 +47,28 @@
 - [x] 发布分支完整本地门禁及包内容核验
 - [x] 推送发布分支并创建独立草稿 PR（#7）
 - [x] 发布 PR #7 的 CI 通过（305671d 的两项 verify 检查通过）
-- [ ] 发布 PR 合并后等待 main CI 通过
+- [x] 发布 PR #7 合并后 main CI 通过（f3fd94a，run 41237261480）
 - [x] 确认 npm 首次发布身份（tongy1n，2FA auth-and-writes）
-- [ ] 首次发布正式包后绑定 npm Trusted Publishing
-- [ ] 从最终 main 创建 tag、构建兼容下载资产、发布 Release 并核对 npm 与 tag CI
+- [x] 首次发布正式包后创建 npm Trusted Publishing 配置
+- [x] 从最终 main 创建 tag、构建兼容下载资产、发布 Release 并核对 npm 与 tag CI
+- [x] 从 npm registry 安装正式包，在隔离 DSH_HOME 验证真实客户端加载与点击计数
+- [ ] 后续发布前检查 Trusted Publisher 状态并完成首个真实 OIDC 发布；若新配置已过期，先重建
 
 ## Review
 
 - 验收实例由 main 9303d99 的真实安装包启动，隔离 DSH_HOME；维护者已明确确认人工验收通过。
 - Desktop 的 8 个构建 gate 与启动通过；受 CUA 权限限制，未完成 Desktop UI 自动化逐元素验收。
-- npm 首次发布采用本机已登录账号；正式包发布后绑定 Trusted Publishing，后续版本由 Release 工作流发布。
+- npm 首次发布已采用本机已登录账号完成；Trusted Publisher 配置已创建，后续版本需验证 Release 工作流的 OIDC 真实发布。
 - v0.1.5 本地门禁通过：typecheck、构建、2 个测试文件共 14 项测试、pack:check、npm:check、release:check、git diff --check、lib 产物一致性。
 - 本次检查设置 pnpm_config_verify_deps_before_run=false 使用现有本地依赖，避免 pnpm 自动重装在无 TTY 环境中中断；没有修改依赖或项目配置。
 - 2026-11-01 维护者已完成 npm 登录与浏览器 2FA 认证；npm whoami 返回 tongy1n。包尚不存在时 trust API 返回 404，需先首次发布再绑定。
 - 首次发布先合并本发布 PR，等待 main CI，通过后从同一 main 提交打 tag 和构建发布包；创建 GitHub Release 时临时停用仅 npm-publish 工作流，随后恢复，避免重复发布同一个已存在版本。不使用占位包或长期 token。
+- v0.1.5 已公开发布至 npm 与 GitHub Release；npm latest 为 0.1.5。发布时远端 main 和 v0.1.5 tag 均为 f3fd94a5864100c41859d5e56b2c0f02b05f4cfc；tag CI run 41237577247 通过。
+- npm 包、GitHub 下载资产与本地包逐字节一致，SHA256 为 70e8e3c7642c076d25f0a6ab9b5fd9333055f32b0ef0d927c23b8a01327db71d。GitHub 资产保留名称 deepseek-ai-dsh-client-ui-muyu-0.1.5.tgz。
+- Trusted Publisher 创建返回成功，id 为 2433e93c-5327-4bcc-abfd-4664a9eb9171，仓库 TongY1n/ui-muyu，工作流 npm-publish.yml。npm 官方文档的 Trusted publisher configuration expiry 条款要求新配置两天内首次成功发布，否则过期；本版为手动首次发布，不声称 OIDC 已实际验证，下一次发版需先核对并按需重建，不为此额外发布无功能变化的版本。
+- npm-publish.yml 已恢复 active；工作流运行列表为空，未触发重复 npm 发布。
+- 实际验证命令：dsh plugin --profile web add dsh-ui-muyu@0.1.5；配置目录 /tmp/dsh-muyu-npm-v0.1.5-install。正式包在 DSH 0.2.2-alpha.2 启动成功，木鱼可见，点击计数增长，Playwright 控制台零 error、零 warning；没有修改用户真实 DSH 配置。
+- 发布结果已同步到既有 PR #7。本地后续收尾记录位于 docs/release-v0.1.5-closeout，仅修改本任务文件，不混入已发布的 tag/main，也未推送新的开发分支。
 
 # DSH 0.2.2-alpha.2 适配
 
