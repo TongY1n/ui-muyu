@@ -1,13 +1,13 @@
-# OIDC 首次自动发布准备（2026-11-01）
+# OIDC 首次自动发布与验收（2026-11-01）
 
 - [x] 核对官方文档与本机 npm 11.19.1 实现，区分 dry-run 凭据交换与实际发布
 - [x] 核实远端 main 为 b0c25ab，v0.1.6 分支、tag 与 npm 版本未占用
 - [x] 从最新 main 创建本地 release-v0.1.6，准备版本、registry 与公开更新日志
 - [x] 完整本地门禁及发布元数据检查
 - [x] 维护者确认发布 v0.1.6（2026-11-01，授权推送 PR、合并与正式发布）
-- [ ] 推送发布分支、创建 PR，并在 PR/main CI 通过后创建 tag 与 Release
-- [ ] 由现有 npm-publish.yml 完成首次真实 OIDC 发布并验证 provenance
-- [ ] 核对 npm、GitHub 资产、registry 与发布提交，完成真实安装验证
+- [x] 推送发布分支、创建 PR，并在 PR/main CI 通过后创建 tag 与 Release（PR #9）
+- [x] 由现有 npm-publish.yml 完成首次真实 OIDC 发布并验证 provenance（run 41244424796）
+- [x] 核对 npm、GitHub 资产、registry 与发布提交，完成真实安装验证
 
 ## Review
 
@@ -16,6 +16,14 @@
 - 官方文档没有明确说明未批准的 staged publish 是否满足首次成功发布要求，因此不以暂存结果关闭该验收项。
 - 正常触发现有 Release published 工作流，核对 npm OIDC 发布成功日志和 provenance；本次不复用已发布的 0.1.5，也不关闭发布工作流。
 - 本地 typecheck、构建、14 项测试、pack:check、npm:check、release:check、git diff --check 均通过；src、lib、锁文件、DSH patch 与现有 npm 发布工作流无差异。维护者确认后再次核对分支包含最新 main b0c25ab，main CI run 41239905977 通过。
+- PR #9 的两项 CI run 41243871945、41244051300 通过，合并提交为 f81c75aa18185670215e851c0079862d8119336a；随后 main CI run 41244207928 和 tag CI run 41244348218 通过。
+- v0.1.6 tag 指向该合并提交；GitHub Release published 正常触发 npm-publish.yml，run 41244424796 成功。日志确认签署来源证明并发布到透明日志（logIndex 3614963406）；没有关闭工作流或改用本机手动发布。
+- npm latest 已更新为 0.1.6，gitHead 为 f81c75aa18185670215e851c0079862d8119336a。SLSA v1 provenance 的包摘要、refs/tags/v0.1.6、TongY1n/ui-muyu、.github/workflows/npm-publish.yml 与该源码提交均已逐项核对。
+- 独立临时目录执行 npm audit signatures：7 个包的 registry 签名通过，1 个包的 attestation 通过；正式 npm tarball 的 integrity、shasum 通过，包内 20 个文件与发布提交一致。
+- 按维护者要求，GitHub Release 上传 npm 同名资产 dsh-ui-muyu-0.1.6.tgz，同时保留 registry 当前地址所需的 deepseek-ai-dsh-client-ui-muyu-0.1.6.tgz。两个正式资产重新下载后均与 npm 包逐字节一致，SHA256 为 99f93eeaaf72b847ef6d61273f395ca5e71f8dd93b345fc9d2ba217ed7a2cae0。
+- 正式安装命令 dsh plugin --profile web add dsh-ui-muyu@0.1.6 成功；隔离目录 /tmp/dsh-muyu-npm-v0.1.6-install，验证宿主为 DSH 0.2.2-alpha.2-f3803c9。真实页面木鱼可见，点击后功德从 0 增至 1，浏览器日志零 error、零 warning；验收专用浏览器和 4168 实例已停止，未操作用户真实配置。
+- 本版没有运行时或 UI 改动，Desktop 验证沿用已记录的构建和启动结果及权限限制，不声称新增 Desktop 完整 UI 验收。CI 另提示 pnpm/action-setup@v4 使用旧 action 运行时，本次发布通过，后续维护可单独升级。
+- 收尾仅通过 docs/release-v0.1.6-closeout 独立 PR 归档本记录；不移动已发布 tag，不改已发布包与 registry 元数据。收尾开始时 Git HTTPS fetch 连接超时，已用 GitHub API 核对远端 main、本地 origin/main、分支起点均为 f81c75a。
 
 # 开发分支合并与人工验收（2026-11-01）
 
@@ -71,7 +79,7 @@
 - [x] 首次发布正式包后创建 npm Trusted Publishing 配置
 - [x] 从最终 main 创建 tag、构建兼容下载资产、发布 Release 并核对 npm 与 tag CI
 - [x] 从 npm registry 安装正式包，在隔离 DSH_HOME 验证真实客户端加载与点击计数
-- [ ] 后续发布前检查 Trusted Publisher 状态并完成首个真实 OIDC 发布；若新配置已过期，先重建
+- [x] 后续发布前检查 Trusted Publisher 状态并完成首个真实 OIDC 发布（v0.1.6 已完成，见顶部验收记录）
 
 ## Review
 
