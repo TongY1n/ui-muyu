@@ -1,7 +1,7 @@
 {
   "name": "dsh-ui-muyu",
   "description": "一个赛博木鱼：可拖拽、点击敲击、累积功德的 Web 悬浮小摆件",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "packageManager": "pnpm@11.7.0",
   "publishConfig": {
     "access": "public"

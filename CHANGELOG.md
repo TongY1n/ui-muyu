@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.6 — 2026-11-01
+
+- npm 发布采用 GitHub Actions OIDC 身份认证，并附带构建来源证明（provenance）。
+- 延续 DSH `0.2.2-alpha.2` 兼容性和 GitHub Release 安装入口。
+
 ## v0.1.5 — 2026-11-01
 
 - 更新开发依赖，适配并验证 DSH `0.2.2-alpha.2`，保留现有木鱼外观与交互。
