@@ -45,7 +45,8 @@
 - [x] 核对最新 main、CI 和版本占用情况，从 9303d99 创建 release-v0.1.5
 - [x] 同步 package.json、registry 元数据与公开更新日志
 - [x] 发布分支完整本地门禁及包内容核验
-- [ ] 推送发布分支并创建独立 PR，等待 PR CI 通过
+- [x] 推送发布分支并创建独立草稿 PR（#7）
+- [ ] 等待发布 PR CI 通过
 - [ ] 发布 PR 合并后等待 main CI 通过
 - [ ] 完成 npm 首次发布身份与 Trusted Publishing 前置条件
 - [ ] 从最终 main 创建 tag、构建兼容下载资产、发布 Release 并核对 npm 与 tag CI
