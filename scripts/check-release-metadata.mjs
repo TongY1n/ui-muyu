@@ -5,7 +5,7 @@ const registry = JSON.parse(await readFile(new URL('../registry/curated/plugin.j
 
 const version = packageJson.version
 const tag = `v${version}`
-const expectedTarball = `deepseek-ai-dsh-client-ui-muyu-${version}.tgz`
+const expectedTarball = `${packageJson.name}-${version}.tgz`
 const expectedSpecSuffix = `/releases/download/${tag}/${expectedTarball}`
 const errors = []
 

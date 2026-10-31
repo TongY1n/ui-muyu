@@ -4,7 +4,7 @@
   "type": "bundle",
   "version": "v0.1.6",
   "repo": "TongY1n/ui-muyu",
-  "spec": "https://github.com/TongY1n/ui-muyu/releases/download/v0.1.6/deepseek-ai-dsh-client-ui-muyu-0.1.6.tgz",
+  "spec": "https://github.com/TongY1n/ui-muyu/releases/download/v0.1.6/dsh-ui-muyu-0.1.6.tgz",
   "description": "一个赛博木鱼：可拖拽、点击敲击、累积功德的 Web 悬浮小摆件",
   "license": "MIT",
   "tags": [

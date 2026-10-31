@@ -1,4 +1,4 @@
-# @deepseek-ai/dsh-client-ui-muyu
+# dsh-ui-muyu
 
 [English](README.md) | 中文
 
@@ -13,6 +13,9 @@
 ## 安装
 
 ```sh
+# npm 安装
+dsh plugin --profile web add dsh-ui-muyu
+# 源码安装
 dsh plugin --profile web add github:TongY1n/ui-muyu
 ```
 

@@ -1,4 +1,4 @@
-# @deepseek-ai/dsh-client-ui-muyu
+# dsh-ui-muyu
 
 English | [中文](README.zh.md)
 
@@ -13,6 +13,9 @@ Click the fish to strike it; press and drag to move it anywhere. Progress surviv
 ## Install
 
 ```sh
+# npm
+dsh plugin --profile web add dsh-ui-muyu
+# source
 dsh plugin --profile web add github:TongY1n/ui-muyu
 ```
 
