@@ -2,9 +2,9 @@
   "id": "ui-muyu",
   "name": "赛博木鱼",
   "type": "bundle",
-  "version": "v0.1.4",
+  "version": "v0.1.5",
   "repo": "TongY1n/ui-muyu",
-  "spec": "https://github.com/TongY1n/ui-muyu/releases/download/v0.1.4/deepseek-ai-dsh-client-ui-muyu-0.1.4.tgz",
+  "spec": "https://github.com/TongY1n/ui-muyu/releases/download/v0.1.5/deepseek-ai-dsh-client-ui-muyu-0.1.5.tgz",
   "description": "一个赛博木鱼：可拖拽、点击敲击、累积功德的 Web 悬浮小摆件",
   "license": "MIT",
   "tags": [
