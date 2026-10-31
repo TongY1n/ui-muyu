@@ -1,8 +1,16 @@
 {
-  "name": "@deepseek-ai/dsh-client-ui-muyu",
+  "name": "dsh-ui-muyu",
   "description": "一个赛博木鱼：可拖拽、点击敲击、累积功德的 Web 悬浮小摆件",
   "version": "0.1.4",
   "packageManager": "pnpm@11.7.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TongY1n/ui-muyu.git"
+  },
+  "homepage": "https://github.com/TongY1n/ui-muyu#readme",
   "engines": {
     "dsh": ">=0.2.1-alpha.2 <0.3.0"
   },
@@ -42,6 +50,7 @@
     "test": "pnpm build && vitest run",
     "check": "pnpm typecheck && pnpm build",
     "pack:check": "pnpm pack --dry-run",
+    "npm:check": "node scripts/check-npm-package.mjs",
     "release:check": "node scripts/check-release-metadata.mjs"
   },
   "license": "MIT",

@@ -40,6 +40,9 @@ jobs:
       - name: Check package contents
         run: pnpm pack:check
 
+      - name: Check npm package contents
+        run: pnpm npm:check
+
       - name: Check release metadata
         run: pnpm release:check
 

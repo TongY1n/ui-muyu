@@ -1,3 +1,44 @@
+# 开发分支合并与人工验收（2026-11-01）
+
+- [x] 核实所有远端待合并开发分支，并纳入本次任务
+- [x] 规范 PR #4：本地完整门禁通过，PR CI 通过，合并后 main CI 通过
+- [x] DSH 适配 PR #5：同步最新 main，完整门禁和 PR CI 通过，合并后 main CI 通过
+- [x] npm 分支同步最新 main，保留包名迁移和 DSH 最新依赖，合并两边任务记录
+- [x] npm 分支同步 main 后本地完整门禁通过：typecheck、14 项测试、pack:check、npm:check、release:check、产物一致性与空白检查
+- [ ] 推送 npm 分支并创建独立 PR，等待 PR CI 通过后合并
+- [ ] 等待 npm PR 合并后的 main CI 通过
+- [ ] 从最终 main 构建并启动隔离 DSH 实例，交由维护者人工验收
+- [ ] 维护者明确确认人工验收通过后，才进入 release-vX.Y.Z 分支、tag、Release、npm 发布
+
+## Review
+
+- npm 前置条件：registry 查询 dsh-ui-muyu 返回 HTTP 404；本机 npm whoami 返回 401，尚无可用发布身份。
+- npm workflow 仅由 Release published 事件触发；普通分支或 main 的 push/merge 不会发布 npm。
+- 首次发布账号、包归属和 npm Trusted Publishing 绑定仍待完成，不能将 workflow 存在视为已具备发布权限。
+- 保留 GitHub Release 兼容下载入口，不提前修改旧版本索引或发布元数据；本轮在人工验收关卡暂停。
+
+# npm 一键安装支持
+
+- [x] 现状分析：确认 npm 包、DSH Bundle 契约和市场索引格式
+- [x] Spec 第一段确认：现状与目标边界（范围从 A 调整为 C）
+- [x] Spec 第二段确认：功能点与发布方案
+- [x] Spec 第三段确认：风险、兼容策略与验收标准
+- [x] 用户确认完整 Spec
+- [x] 从最新 main 创建无前缀开发分支
+- [x] 实现 npm 发布与安装链路
+- [x] 运行类型检查、构建、测试、打包和发布元数据检查
+- [x] 本地验证并等待用户认可
+- [x] 根据用户确认将 npm 包名改为 `dsh-ui-muyu`，同步 DSH bundle 标识与 npm 包校验
+- [ ] 经用户认可后推送远端并创建 PR
+
+## Review
+
+- 本地门禁通过：typecheck、14 项 Vitest、pack:check、npm:check、release:check、workflow YAML 校验和 git diff --check。
+- 生成的 lib/ 未发生额外变化。
+- 待用户认可后再推送远端并创建 PR。
+- 包名变更验证通过：类型检查、构建、14 项 Vitest、npm 包内容检查、发布元数据检查和 `git diff --check`。
+- pnpm 统一命令曾被环境网络/DNS 与 npm 缓存权限阻断，已使用现有本地依赖和临时 npm 缓存完成等价验证。
+
 # DSH 0.2.2-alpha.2 适配
 
 ## 现状分析
