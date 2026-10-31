@@ -68,7 +68,7 @@
 - Trusted Publisher 创建返回成功，id 为 2433e93c-5327-4bcc-abfd-4664a9eb9171，仓库 TongY1n/ui-muyu，工作流 npm-publish.yml。npm 官方文档的 Trusted publisher configuration expiry 条款要求新配置两天内首次成功发布，否则过期；本版为手动首次发布，不声称 OIDC 已实际验证，下一次发版需先核对并按需重建，不为此额外发布无功能变化的版本。
 - npm-publish.yml 已恢复 active；工作流运行列表为空，未触发重复 npm 发布。
 - 实际验证命令：dsh plugin --profile web add dsh-ui-muyu@0.1.5；配置目录 /tmp/dsh-muyu-npm-v0.1.5-install。正式包在 DSH 0.2.2-alpha.2 启动成功，木鱼可见，点击计数增长，Playwright 控制台零 error、零 warning；没有修改用户真实 DSH 配置。
-- 发布结果已同步到既有 PR #7。本地后续收尾记录位于 docs/release-v0.1.5-closeout，仅修改本任务文件，不混入已发布的 tag/main，也未推送新的开发分支。
+- 发布结果已同步到既有 PR #7；收尾记录使用 docs/release-v0.1.5-closeout 独立分支，仅修改本任务文件。维护者指示继续后，以独立 PR 归档这些记录，保持已发布的 v0.1.5 tag 与安装包不变。
 
 # DSH 0.2.2-alpha.2 适配
 
