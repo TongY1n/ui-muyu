@@ -4,18 +4,18 @@
 - [x] 核实远端 main 为 b0c25ab，v0.1.6 分支、tag 与 npm 版本未占用
 - [x] 从最新 main 创建本地 release-v0.1.6，准备版本、registry 与公开更新日志
 - [x] 完整本地门禁及发布元数据检查
-- [ ] 维护者确认发布 v0.1.6
+- [x] 维护者确认发布 v0.1.6（2026-11-01，授权推送 PR、合并与正式发布）
 - [ ] 推送发布分支、创建 PR，并在 PR/main CI 通过后创建 tag 与 Release
 - [ ] 由现有 npm-publish.yml 完成首次真实 OIDC 发布并验证 provenance
 - [ ] 核对 npm、GitHub 资产、registry 与发布提交，完成真实安装验证
 
 ## Review
 
-- 本次只准备现有发布流程所需的版本元数据，不改运行时代码、构建产物或工作流；未确认前不推送、不创建 PR、tag 或 Release。
+- 本次只更新现有发布流程所需的版本元数据，不改运行时代码、构建产物或工作流；维护者已确认按现有 Release 工作流完成首次真实 OIDC 发布。
 - npm 官方 Trusted publisher configuration expiry 条款要求两天内完成首次成功发布；本机 /usr/local/lib/node_modules/npm/lib/commands/publish.js 的 Publish.#publish 在 dry-run 时仍调用 oidc（147 行），但在 !dryRun 分支才调用 libpub（194—205 行），不能将 dry-run 通过当作实际发布通过。
 - 官方文档没有明确说明未批准的 staged publish 是否满足首次成功发布要求，因此不以暂存结果关闭该验收项。
-- 若维护者确认本版本，正常触发现有 Release published 工作流，核对 npm OIDC 发布成功日志和 provenance；本次不复用已发布的 0.1.5，也不关闭发布工作流。
-- 本地 typecheck、构建、14 项测试、pack:check、npm:check、release:check、git diff --check 均通过；src、lib、锁文件、DSH patch 与现有 npm 发布工作流无差异。候选版本仅保留在本地，等待维护者确认是否发布 v0.1.6。
+- 正常触发现有 Release published 工作流，核对 npm OIDC 发布成功日志和 provenance；本次不复用已发布的 0.1.5，也不关闭发布工作流。
+- 本地 typecheck、构建、14 项测试、pack:check、npm:check、release:check、git diff --check 均通过；src、lib、锁文件、DSH patch 与现有 npm 发布工作流无差异。维护者确认后再次核对分支包含最新 main b0c25ab，main CI run 41239905977 通过。
 
 # 开发分支合并与人工验收（2026-11-01）
 
