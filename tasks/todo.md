@@ -48,17 +48,19 @@
 - [x] 推送发布分支并创建独立草稿 PR（#7）
 - [x] 发布 PR #7 的 CI 通过（305671d 的两项 verify 检查通过）
 - [ ] 发布 PR 合并后等待 main CI 通过
-- [ ] 完成 npm 首次发布身份与 Trusted Publishing 前置条件
+- [x] 确认 npm 首次发布身份（tongy1n，2FA auth-and-writes）
+- [ ] 首次发布正式包后绑定 npm Trusted Publishing
 - [ ] 从最终 main 创建 tag、构建兼容下载资产、发布 Release 并核对 npm 与 tag CI
 
 ## Review
 
 - 验收实例由 main 9303d99 的真实安装包启动，隔离 DSH_HOME；维护者已明确确认人工验收通过。
 - Desktop 的 8 个构建 gate 与启动通过；受 CUA 权限限制，未完成 Desktop UI 自动化逐元素验收。
-- npm 发布身份未就绪时，不触发 Release published 事件，避免自动 npm 发布失败。
+- npm 首次发布采用本机已登录账号；正式包发布后绑定 Trusted Publishing，后续版本由 Release 工作流发布。
 - v0.1.5 本地门禁通过：typecheck、构建、2 个测试文件共 14 项测试、pack:check、npm:check、release:check、git diff --check、lib 产物一致性。
 - 本次检查设置 pnpm_config_verify_deps_before_run=false 使用现有本地依赖，避免 pnpm 自动重装在无 TTY 环境中中断；没有修改依赖或项目配置。
-- 2026-11-01 再次核实 npm whoami 返回 401；发布 PR 保持 draft，暂不合并或发布。
+- 2026-11-01 维护者已完成 npm 登录与浏览器 2FA 认证；npm whoami 返回 tongy1n。包尚不存在时 trust API 返回 404，需先首次发布再绑定。
+- 首次发布先合并本发布 PR，等待 main CI，通过后从同一 main 提交打 tag 和构建发布包；创建 GitHub Release 时临时停用仅 npm-publish 工作流，随后恢复，避免重复发布同一个已存在版本。不使用占位包或长期 token。
 
 # DSH 0.2.2-alpha.2 适配
 
